@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTRRAACCEERR</title>
+  <link rel="shortcut icon" type="image/x-icon" href="https://ligne.page/favicon.ico">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="tools">
+    <a href="/" title="tracer"><svg width="353" height="74" viewBox="0 0 353 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M289.434 58.4C287.869 62.6 285.387 65.9333 281.986 68.4C278.653 70.8 274.436 72 269.334 72C262.396 72 257.023 69.7667 253.214 65.3C249.405 60.7667 247.5 54 247.5 45C247.5 36 249.371 29.2667 253.112 24.8C256.853 20.2667 262.124 18 268.926 18C272.395 18 275.456 18.6333 278.109 19.9C280.829 21.1 283.074 22.8333 284.842 25.1C286.611 27.3667 287.937 30.1 288.822 33.3C289.774 36.5 290.25 40.1 290.25 44.1V44.8H256.5" stroke="white" stroke-width="4"/>
+      <path d="M227.674 29.2C226.538 25.9333 224.468 23.2667 221.462 21.2C218.523 19.0667 214.782 18 210.24 18C203.561 18 198.351 20.2667 194.611 24.8C190.87 29.2667 189 36 189 45C189 54 190.87 60.7667 194.611 65.3C198.351 69.7667 203.561 72 210.24 72C212.578 72 214.716 71.7 216.653 71.1C218.59 70.5 220.293 69.7 221.762 68.7C223.299 67.6333 224.601 66.4 225.67 65C226.805 63.6 227.707 62.1333 228.375 60.6" stroke="white" stroke-width="4"/>
+      <path d="M153.859 69.4C151.138 71.1333 147.294 72 142.327 72C136.68 72 132.359 70.8 129.366 68.4C126.372 65.9333 124.875 62.4 124.875 57.8C124.875 55.7333 125.181 53.8 125.794 52C126.474 50.2 127.562 48.6667 129.059 47.4C130.624 46.1333 132.699 45.1333 135.285 44.4C137.87 43.6667 141.102 43.3 144.98 43.3H162.432M126.61 28.8C128.107 25.4667 130.352 22.8333 133.346 20.9C136.407 18.9667 140.286 18 144.98 18C150.491 18 154.778 19.4667 157.839 22.4C160.901 25.3333 162.432 29.5 162.432 34.9V67.9C162.432 69.8333 163.419 70.8 165.392 70.8H173.25" stroke="white" stroke-width="4"/>
+      <path d="M64.125 18.2355H84.349V35.2632M112.5 18H100.406C98.3059 18 96.2734 18.3401 94.3086 19.0201C92.4115 19.7002 90.7177 20.7544 89.2272 22.1826C87.7366 23.5428 86.5509 25.277 85.6702 27.3853C84.7894 29.4936 84.349 32.01 84.349 34.9344V70.875M107.317 70.875H64.125" stroke="white" stroke-width="4"/>
+      <path d="M302.625 18.1177H322.849C322.849 35.7035 322.849 53.2892 322.849 70.875M345.817 70.875H302.625" stroke="white" stroke-width="4"/>
+      <path d="M48.375 18.4803H20.007V67.9303C20.007 69.8934 20.9691 70.875 22.8935 70.875H48.375" stroke="white" stroke-width="4"/>
+      <path d="M0 18.4803H5.00696C13.2912 18.4803 20.007 11.7646 20.007 3.48029V0" stroke="white" stroke-width="4"/>
+      <path d="M353.007 18L348 18C339.716 18 333 24.7157 333 33L333 36.4803" stroke="white" stroke-width="4"/>
+      </svg></a>
+    <button id="run"> ▶ &nbsp; exécuter le code</button>
+
+
+    <button id="save-js">JS</button>
+    <button id="save-svg">SVG</button>
+
+  </div>
+  <div class="grid">
+    <!-- monaco editor -->
+    <div id="editor"></div>
+    <!-- result -->
+    <div id="main-result">
+      <div class="resize-bar"></div>
+      <div id="result">
+        <div class="error-item"></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- #script -->
+  <div id="script"></div>
+  <script src="gsap.js"></script>
+  <script src="MotionPathPlugin.js"></script>
+  <script src="DrawSVGPlugin.js"></script>
+  <script src="svg-path-commander.js"></script>
+  <script src="reverse.js"></script>
+
+  <script src="hershey.js" type="module"></script>
+  <script src="perlin.js"></script>
+  <script src="paper-full.min.js"></script>
+  <script src="paperjs-offset.js"></script>
+
+
+  <script src="main.js" type="module"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.min.js"></script>
+
+
+
+  <script type="module">
+    import {$SVG,iniMain} from './main.js'; 
+    
+    const $run = document.getElementById('run');
+
+    /* USER MODE */
+    let codeStorage = localStorage.getItem('code') || [
+      '/* bonjour */',
+      'afficherLaGrille();'
+    ].join('\n');
+
+
+  
+
+    const externalScriptContent =  await fetch('main.js').then(response => response.text());
+    // replace 'export *any space* const' to 'const'
+    // remove import 
+    const externalScript = externalScriptContent.replace(/export\s*const/g, 'const').replace(/import\s*{.*}.*from.*;/g, '');
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' }});
+    // add fr-FR
+    require.config({
+      'vs/nls': {
+        availableLanguages: {
+          '*': 'fr'
+        }
+      }
+    });
+
+    require(['vs/editor/editor.main'], function() {
+      // Ajouter le script externe à Monaco Editor
+      monaco.languages.typescript.javascriptDefaults.addExtraLib(externalScript, 'filename/main.d.ts');
+
+
+      function createDependencyProposals(range){
+      return [
+                {
+                  label: 'afficherLaGrille',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'afficherLaGrille();',
+                  range: range
+                },
+                {
+                  label: 'relierLesPoints',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: "relierLesPoints(${0});",
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                },
+                {
+                  label: 'tracerLeRectangle',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'tracerLeRectangle(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+
+                },
+                {
+                  label: 'tracerLeCercle',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'tracerLeCercle(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                },
+                {
+                  label: 'tracerLePolygone',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'tracerLePolygone(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                },
+                {
+                  label: 'parcourir',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'parcourir(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+
+                },
+                {
+                  label: 'courber',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'courber(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                },
+                {
+                  label: 'supprimer',
+                  kind: monaco.languages.CompletionItemKind.Function,
+                  insertText: 'supprimer(${0});',
+                  range: range,
+                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                }
+              ]
+    }
+
+      monaco.languages.registerCompletionItemProvider("javascript", {
+        provideCompletionItems: function (model, position) {
+          // find out if we are completing a property in the 'dependencies' object.
+          var textUntilPosition = model.getValueInRange({
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column,
+          });
+        
+          var word = model.getWordUntilPosition(position);
+          var range = {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: word.startColumn,
+            endColumn: word.endColumn,
+          };
+          return {
+            suggestions: createDependencyProposals(range),
+          };
+        },
+      });
+  
+
+      const editor = monaco.editor.create(document.getElementById('editor'), {
+        value:codeStorage,
+        language: 'javascript',
+        // theme: 'vs-dark',
+        wordWrap: 'on',
+        minimap: { enabled: false },
+        fontSize: 18,
+        automaticLayout: true,
+        
+      });
+      // add action cmd + enter
+      editor.addAction({
+        id: 'run',
+        label: 'Run',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: function(ed) {
+          $run.click();
+        }
+      });
+
+
+      // : key binding
+
+      monaco.editor.addKeybindingRules([
+      {
+        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma,
+        command: "editor.action.commentLine",
+        when: "editorTextFocus && !editorReadonly",
+      },
+    ]);
+
+
+      window.editor = editor;
+
+    });
+
+
+    const $result = document.getElementById('result');
+    const $errorItem = document.querySelector('.error-item');
+
+    $run.addEventListener('click', () => {
+      const tl = gsap.timeline();
+      // css rainbow
+      let gradient = 'linear-gradient(90deg,#1405aa, #1405FF, #1405aa)';
+      
+      tl.to('.tools',{background: gradient, duration: 0.4});
+
+      tl.to('.tools',{background: 'linear-gradient(90deg, #1405aa,#1405aa, #1405aa)', duration: 1.4});
+      tl.fromTo('.tools #run',{x: -30},{x: 0, duration: 1.5,ease:"elastic"},0);
+
+      iniMain();
+      let code = monaco.editor.getModels()[0].getValue();
+      localStorage.setItem('code', code);
+      const $script = document.getElementById('script');
+      $script.innerHTML = '';
+      $SVG.innerHTML = '';  
+      $errorItem.innerHTML = '';
+      try {
+        let DURATION = 0.4;
+        let STAGGER = 0.001;
+        const script = document.createElement('script');
+        script.type = 'module';
+
+        // find tortue(*)
+        const replaceLoop = input => {
+          const openParens = (input.match(/\(/g) || []).length;
+          const closeParens = (input.match(/\)/g) || []).length;
+
+          // Vérifie si les parenthèses sont équilibrées
+          if (openParens !== closeParens) {
+          console.log("Erreur : le nombre de parenthèses ouvrantes et fermantes n'est pas égal.");
+          return [];
+          }
+
+          let result = [];
+          let regex = /boucler\(([^()]*(?:\((?:[^()]*(?:\([^()]*\))?[^()]*)*\))?[^()]*)\)/g;
+          let match;
+
+          // rechercher regex remplacer par "coucou"
+
+          let code = input.replace(regex, (match, group1) => {
+          let loopThis = group1; // Utilisez `group1` capturé directement
+          let lastComma = loopThis.lastIndexOf(',');
+          let firstPart = loopThis.slice(0, lastComma);
+          let secondPart = parseInt(loopThis.slice(lastComma + 1));
+
+          // Utilisation de backticks pour inclure `firstPart` et `secondPart` dans un modèle de boucle
+          return `for(let i = 1; i <= ${secondPart}; i++) { ${firstPart} }`; 
+          }); 
+          return code; 
+          };
+        
+
+        // remplacer boucler(xxxxxxx,N) par for(let i=0; i<N; i++){xxxxxxx}
+        // code = code.replace(/boucler\((\s*.*?\))\s*,\s*(\d*)\s*(\)\s*)/g, 'for(let i=1; i<=$2; i++){$1}');
+        code = replaceLoop(code);
+        
+        // find animation(float,float) in code and get the number to set the duration
+        let match = code.match(/animation\((\d*\.?\d*)\s*,\s*(\d*\.?\d*)\)/);
+        if(match){
+          DURATION = match[1];
+          STAGGER = match[2];
+        }else{
+          match = code.match(/animation\((\d*\.?\d*)\)/);
+          if(match){
+            DURATION = (match[1] !=="")? match[1]: DURATION;
+          }
+        }
+
+
+
+
+        const functionNames= {
+          'adoucir': 'soften',
+          'aide': 'help',
+          'afficherLaGrille': 'showGrid',
+          'animation': 'animate',
+          'auHasard': 'random',
+          'bruit': 'noise',
+          'calligrammer': 'calligram',
+          'cosinus': 'cosine',
+          'courber': 'bend',
+          'couleur': 'color',
+          'cloner': 'clone',
+          'crayon': 'pencil',
+          'deplacer': 'move',
+          'drapeau': 'flag',
+          'epaisseur': 'thickness',
+          'formatDin' : 'dinFormat',
+          'fusionner': 'merge',
+          'grouper': 'group',
+          'inverserLeSens': 'reverseDirection',
+          'placerSurGrille': 'placeOnGrid',
+          'parcourir': 'traverse',
+          'parcourSup': 'traverseSup',
+          'relierLesPoints': 'connectPoints',
+          'sinus': 'sine',
+          'supprimer': 'remove',
+          'tensionDeSpline': 'splineTension',
+          'tramer': 'weave',
+          'tramerEnPoints': 'stipple',
+          'tortue': 'turtle',
+          'tracerLeTexte': 'drawText',
+          'tracerLeParagraphe': 'drawParagraph',
+          'tourner': 'turn',
+          'tracerLArc': 'drawArc',
+          'tracerLesLignes': 'drawLines',
+          'tracerLaSpline': 'drawSpline',
+          'tracerLePolygone': 'drawPolygon',
+          'tracerLeRectangle': 'drawRectangle',
+          'tracerLeCercle': 'drawCircle',
+          'tracerLEquation': 'drawEquation',
+          'tracerLEtoile': 'drawStar',
+          'tracerLEquation': 'drawEquation',
+          'tracerLeContour': 'drawOutline',
+          'appliquerLesTransformations': 'applyTransformations',
+          'png':'_png'
+        };
+        // english version
+        // transform function names to english
+        let fr = Object.keys(functionNames).join(', ');
+        let eng = Object.entries(functionNames).map(([key, value]) => `${key} as ${value}`).join(', ');
+        script.textContent = `import {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z} from './main.js';`;
+        script.textContent += `import{ ${fr}, ${eng} } from './main.js';`
+        script.textContent += `${code}`;
+        script.textContent += ` ; `;
+        script.textContent += `if(document.querySelector('#result #grid')!==null) gsap.from('#result #grid line', {duration:${DURATION}, drawSVG: '0%', stagger:${STAGGER} });gsap.from('#result svg>*,g.draw>*', {duration: ${DURATION}, drawSVG: '0%', stagger: ${STAGGER}});if(document.querySelector('#result g.trame')!==null) gsap.from('#result svg g.trame>*', {duration:${DURATION/2}, drawSVG: '0%', stagger: ${STAGGER}})`;
+        
+
+
+        // wait 300ms before running the script
+        setTimeout(() => {
+          $script.appendChild(script);
+        }, 300);
+      } catch (error) {
+        $script.innerHTML = error;
+      }
+    });
+
+    console.log = function(message) {
+      // Crée un élément pour afficher le message
+      $errorItem.innerHTML += '<br>'+message;
+    };
+
+    
+    window.onerror = function(message, source, lineno, colno, error) {
+        // Crée un élément pour afficher l'erreur
+        if(source !== "") $errorItem.innerHTML += "<br><strong>Erreur:</strong> " + message + " - Ligne: " + (parseInt(lineno)-2)+ "<br>";
+     
+    };
+
+    const $saveJS = document.getElementById('save-js');
+    $saveJS.addEventListener('click', () => {
+      const code = monaco.editor.getModels()[0].getValue();
+      const blob = new Blob([code], {type: 'text/javascript'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      let ms = new Date().getTime();
+      a.download = `tracer-${ms}.js`;
+      a.click();
+    });
+
+    const $saveSVG = document.getElementById('save-svg');
+    $saveSVG.addEventListener('click', () => {
+      const commCode = "\n<!--\n"+monaco.editor.getModels()[0].getValue()+"\n-->";
+      const svg = $SVG.outerHTML + commCode;
+      const blob = new Blob([svg], {type: 'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      let ms = new Date().getTime();
+      a.download = `dessin-${ms}.svg`;
+      a.click();
+    });
+
+
+    // cmd + enter to run
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey && e.key === 'Enter') {
+        $run.click();
+      }
+    });
+
+    window.addEventListener('resize', (e) => {
+        console.error('resize');
+        // less than 900px
+        if(window.innerWidth < 900){
+          // hide editor
+          document.querySelector('.grid').style.gridTemplateColumns = '1fr';
+        }else{
+          // show editor
+          document.querySelector('.grid').style.gridTemplateColumns = '1fr 1fr';
+        }
+      });
+
+
+    const $resizeBar = document.querySelector('.resize-bar');
+    const $editor = document.querySelector('#editor');
+    const $grid = document.querySelector('.grid'); 
+
+    $resizeBar.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      let x = e.clientX;
+      let width = $editor.clientWidth;
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', () => {
+        document.removeEventListener('mousemove', move);
+        $resizeBar.style.zIndex = 0;
+        $resizeBar.style.transform = "none";
+
+
+        // window.editor.layout();
+      });
+
+      const $mainResult = document.getElementById('main-result');
+
+      function move(e) {
+        $resizeBar.style.zIndex = 99999;
+        $resizeBar.style.transform = "scaleX(10)";
+
+        const diff = e.clientX - x;
+        $grid.style.gridTemplateColumns = width + diff + 'px 1fr';
+      }
+    });
+
+    /* assistant coordonnées */
+    $SVG.addEventListener("dblclick", e => {
+      const w = $SVG.clientWidth;
+      const h = $SVG.clientHeight;
+      const n = $SVG.getAttribute("viewBox").split(" ")[2]/50-1;
+      let x = e.offsetX/w*50*(n+1);
+      let y = e.offsetY/h*50*(n+1);
+      x = Math.round(x/50);
+      y = Math.round(y/50);
+      // add x,y, to the code editor
+      const model = monaco.editor.getModels()[0];
+      const position = editor.getPosition();
+      const id = model.getOffsetAt(position);
+      // get the char before the cursor
+      let char = model.getValue().charAt(id-1);
+      // if char is a number, add a comma
+      if(!isNaN(char)){
+        model.applyEdits([
+          { range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column), text: `,${x},${y}` }
+        ])
+      }else{
+        model.applyEdits([
+          { range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column), text: `${x},${y}` }
+        ]);
+      }
+      // tiny red dot
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", x*50);
+      dot.setAttribute("cy", y*50);
+      dot.setAttribute("r", 4);
+      dot.setAttribute("fill", "red");
+      dot.classList.add("remove");
+      $SVG.appendChild(dot);
+
+    });
+
+ 
+    /* DRAG .JS file in window */
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('drop');
+
+      const file = e.dataTransfer.files[0];
+      console.warn(file);
+      if (file.type.includes('javascript')) {
+      
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const code = event.target.result;
+        const model = monaco.editor.getModels()[0];
+        console.warn(code);
+        model.setValue(code);
+      };
+      reader.readAsText(file);
+      }
+    });
+
+
+
+    </script>
+</body>
+</html>
