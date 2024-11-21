@@ -7,7 +7,6 @@ canvas.style.display='none';
 document.body.appendChild(canvas);
 paper.setup(canvas);
 
-
 let NAZ = 26;
 let PX = 0;
 let PY = 0;
@@ -1155,6 +1154,8 @@ export const tracerLeCercle = (x=1,y=1,r=1) => {
   return circle;
 }
 
+
+
 /**
  * tracer le rectangle
  * @param {number} x position x du coin supérieur gauche
@@ -1921,8 +1922,9 @@ export const png = async (name="dessin") =>{
   };
 }
 
-
-
+export const langue = (text) => {
+    localStorage.setItem('language', text.slice(0,2));
+}
 
 
 

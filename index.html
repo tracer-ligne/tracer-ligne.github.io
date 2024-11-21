@@ -59,8 +59,61 @@
 
   <script type="module">
     import {$SVG,iniMain} from './main.js'; 
-    
+
+    const language = localStorage.getItem('language') || 'fr';
+    const functionNames= {
+          'adoucir': '_soften',
+          'aide': 'help',
+          'afficherLaGrille': 'showGrid',
+          'animation': 'animate',
+          'auHasard': 'random',
+          'bruit': 'noise',
+          'calligrammer': 'calligram',
+          'cosinus': 'cosine',
+          'courber': 'bend',
+          'couleur': 'color',
+          'cloner': 'clone',
+          'crayon': 'pencil',
+          'deplacer': 'move',
+          'drapeau': 'flag',
+          'epaisseur': 'thickness',
+          'formatDin' : 'dinFormat',
+          'fusionner': 'merge',
+          'grouper': 'group',
+          'inverserLeSens': 'reverseDirection',
+          'placerSurGrille': 'placeOnGrid',
+          'parcourir': 'traverse',
+          'parcourSup': 'traverseSup',
+          'relierLesPoints': 'connectPoints',
+          'sinus': 'sine',
+          'supprimer': 'remove',
+          'tensionDeSpline': 'splineTension',
+          'tramer': 'weave',
+          'tramerEnPoints': 'stipple',
+          'tortue': 'turtle',
+          'tracerLeTexte': 'drawText',
+          'tracerLeParagraphe': 'drawParagraph',
+          'tourner': 'turn',
+          'tracerLArc': 'drawArc',
+          'tracerLesLignes': 'drawLines',
+          'tracerLaSpline': 'drawSpline',
+          'tracerLePolygone': 'drawPolygon',
+          'tracerLeRectangle': 'drawRectangle',
+          'tracerLeCercle': 'drawCircle',
+          'tracerLEquation': 'drawEquation',
+          'tracerLEtoile': 'drawStar',
+          'tracerLEquation': 'drawEquation',
+          'tracerLeContour': 'drawOutline',
+          'appliquerLesTransformations': 'applyTransformations',
+          'png':'_png',
+          'langue':'language',
+        };
+
     const $run = document.getElementById('run');
+    if(language === 'en'){
+     $run.innerHTML =  ' ▶ &nbsp; Run this code';
+    }
+
 
     /* USER MODE */
     let codeStorage = localStorage.getItem('code') || [
@@ -76,6 +129,12 @@
     // remove import 
     const externalScript = externalScriptContent.replace(/export\s*const/g, 'const').replace(/import\s*{.*}.*from.*;/g, '');
 
+    /* english mode */
+    const externalScriptEn = Object.entries(functionNames).reduce((acc, [key, value]) => {
+      return acc.replace(new RegExp('const '+key, 'g'), 'const '+value);
+    }, externalScript);
+
+
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' }});
     // add fr-FR
     require.config({
@@ -88,7 +147,7 @@
 
     require(['vs/editor/editor.main'], function() {
       // Ajouter le script externe à Monaco Editor
-      monaco.languages.typescript.javascriptDefaults.addExtraLib(externalScript, 'filename/main.d.ts');
+      monaco.languages.typescript.javascriptDefaults.addExtraLib(externalScript+externalScriptEn, 'filename/main.d.ts');
 
 
       function createDependencyProposals(range){
@@ -289,52 +348,7 @@
 
 
 
-        const functionNames= {
-          'adoucir': 'soften',
-          'aide': 'help',
-          'afficherLaGrille': 'showGrid',
-          'animation': 'animate',
-          'auHasard': 'random',
-          'bruit': 'noise',
-          'calligrammer': 'calligram',
-          'cosinus': 'cosine',
-          'courber': 'bend',
-          'couleur': 'color',
-          'cloner': 'clone',
-          'crayon': 'pencil',
-          'deplacer': 'move',
-          'drapeau': 'flag',
-          'epaisseur': 'thickness',
-          'formatDin' : 'dinFormat',
-          'fusionner': 'merge',
-          'grouper': 'group',
-          'inverserLeSens': 'reverseDirection',
-          'placerSurGrille': 'placeOnGrid',
-          'parcourir': 'traverse',
-          'parcourSup': 'traverseSup',
-          'relierLesPoints': 'connectPoints',
-          'sinus': 'sine',
-          'supprimer': 'remove',
-          'tensionDeSpline': 'splineTension',
-          'tramer': 'weave',
-          'tramerEnPoints': 'stipple',
-          'tortue': 'turtle',
-          'tracerLeTexte': 'drawText',
-          'tracerLeParagraphe': 'drawParagraph',
-          'tourner': 'turn',
-          'tracerLArc': 'drawArc',
-          'tracerLesLignes': 'drawLines',
-          'tracerLaSpline': 'drawSpline',
-          'tracerLePolygone': 'drawPolygon',
-          'tracerLeRectangle': 'drawRectangle',
-          'tracerLeCercle': 'drawCircle',
-          'tracerLEquation': 'drawEquation',
-          'tracerLEtoile': 'drawStar',
-          'tracerLEquation': 'drawEquation',
-          'tracerLeContour': 'drawOutline',
-          'appliquerLesTransformations': 'applyTransformations',
-          'png':'_png'
-        };
+       
         // english version
         // transform function names to english
         let fr = Object.keys(functionNames).join(', ');
