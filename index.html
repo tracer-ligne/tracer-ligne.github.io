@@ -404,7 +404,7 @@
       }
     });
 
-    console.log = function(message) {
+     window.trace = function(message) {
       // Crée un élément pour afficher le message
       $errorItem.innerHTML += '<br>'+message;
     };
@@ -493,11 +493,12 @@
 
     /* assistant coordonnées */
     $SVG.addEventListener("dblclick", e => {
-      const w = $SVG.clientWidth;
-      const h = $SVG.clientHeight;
-      const n = $SVG.getAttribute("viewBox").split(" ")[2]/50-1;
-      let x = e.offsetX/w*50*(n+1);
-      let y = e.offsetY/h*50*(n+1);
+      const point = $SVG.createSVGPoint();
+      point.x = e.clientX;
+      point.y = e.clientY;
+      const transformedPoint = point.matrixTransform($SVG.getScreenCTM().inverse());
+      let x = transformedPoint.x;
+      let y = transformedPoint.y;
       x = Math.round(x/50);
       y = Math.round(y/50);
       // add x,y, to the code editor

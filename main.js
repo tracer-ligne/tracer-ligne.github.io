@@ -783,7 +783,8 @@ $result.appendChild($SVG);
 /**
  * affiche la grille les lettres et les chiffres
  * @param {number} n nombre de lignes, 26 par défaut
- * @param {boolean} numeric afficher les chiffres (true) ou les lettres (false) 
+ * @param {boolean} numeric 
+ * les chiffres (true) ou les lettres (false) 
  * display the grid with letters and numbers
  * @param.en {number} n number of lines, 26 by default
  * @param.en {boolean} numeric display numbers (true) or letters (false)
@@ -851,11 +852,13 @@ export const afficherLaGrille = (n=26,numeric = false) => {
     // $SVG bbox
     const $$sw = $SVG.querySelectorAll(".sw");
     $$sw.forEach(l => l.classList.remove('sw'));
-
-    const w = $SVG.clientWidth;
-    const h = $SVG.clientHeight;
-    const x = e.offsetX/w*50*(n+1);
-    const y = e.offsetY/h*50*(n+1);
+    const point = $SVG.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    const transformedPoint = point.matrixTransform($SVG.getScreenCTM().inverse());
+    const x = transformedPoint.x;
+    const y = transformedPoint.y;
+ 
     // query data attribute letterNameI
     const letterI = $G.querySelectorAll(`[data-i="${Math.round(x/50)}"]`);
     const letterJ = $G.querySelectorAll(`[data-j="${Math.round(y/50)}"]`);
@@ -1776,17 +1779,15 @@ export const auHasard = (x=NAZ) => gsap.utils.random(1, x, 1);
  *  suppression d'un ou plusieurs éléments
  * @param  {...any} elements
  * @returns void
- * * @example
- * supprimer(element1,element2);
- * supprimer(element1);
- * supprimer(element1,element2,element3); 
+ * @example supprimer(element1,element2);
+ * @example supprimer(element1);
+ * @example supprimer(element1,element2,element3); 
  *  delete one or more elements
  * @param.en  {...any} elements
  * @returns.en void
- * * @example.en
- * delete(element1,element2);
- * delete(element1);
- * delete(element1,element2,element3);
+ * @example.en delete(element1,element2);
+ * @example.en delete(element1);
+ * @example.en delete(element1,element2,element3);
  */
 export const supprimer = (...elements) => {
   // element to array
@@ -2094,8 +2095,6 @@ export const grouper = (...elements) => {
  * @param {number} angle en degrés
  * @returns {number} cosinus de l'angle
  * @example cosinus(90)
- */
-/**
  * cosine
  * @param.en {number} angle in degrees
  * @returns.en {number} cosine of the angle
@@ -2109,8 +2108,6 @@ export const cosinus = (angle) => Math.cos(deg2rad(angle));
  * @param {number} angle en degrés
  * @returns {number} sinus de l'angle
  * @example sinus(90)
- */
-/**
  * sine
  * @param.en {number} angle in degrees
  * @returns.en {number} sine of the angle
@@ -2152,15 +2149,13 @@ export const png = async (name="dessin") =>{
 /**
  * pour changer la langue (english, français)
  * @param {string} text 
- */
-/**
  * to change the language (english, french)
  * @param.en {string} text 
  */
 
 export const langue = (text) => {
-  if(text.slice(0,2) === "fr") console.log('veuillez rafrachir la page pour changer la langue');
-  if(text.slice(0,2) === "en") console.log('please refresh the page to change the language');
+  if(text.slice(0,2) === "fr") trace('veuillez rafrachir la page pour changer la langue');
+  if(text.slice(0,2) === "en") trace('please refresh the page to change the language');
   localStorage.setItem('language', text.slice(0,2));
 }
 
