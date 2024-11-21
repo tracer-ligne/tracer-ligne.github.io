@@ -35,6 +35,7 @@ The drawings are ready to be traced.
 
 ## How does it work?
 Just go to the page [tracer-ligne.github.io](https://tracer-ligne.github.io) and start coding.
+* `language('en')` and refresh to switch to English
 
 ## Technically?
 The code editor is based on Monaco Editor.

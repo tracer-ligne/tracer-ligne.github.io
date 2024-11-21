@@ -22,7 +22,12 @@ const NS = 'http://www.w3.org/2000/svg';
  * @param {Element} element - Element SVG
  * @returns {Element} element
  * @example inverserLeSens(MonCercle)
- * @example inverserLeSens(tracerLeCercle(1,1,1))
+ * @example inverserLeSens(tracerLeCercle(1,1,1)) 
+ * reverse the direction of the SVG path
+ * @param.en {Element} element - SVG Element
+ * @returns.en {Element} element
+ * @example.en reverseDirection(MyCircle)
+ * @example.en reverseDirection(drawCircle(1,1,1))
  */
 export const inverserLeSens = (element) => {
   if(element.tagName === "g"){
@@ -66,6 +71,10 @@ export const formatDin = (f="A6") => {
  * @param {Element} element - Element SVG
  * @returns {Element} element
  * @example tracerLeContour(MonRectangle,1)
+ * 
+ * @param.en {Element} element - SVG Element
+ * @returns.en {Element} element
+ * @example.en drawOutline(MyRectangle,1)
  */
  
 export const tracerLeContour = (element,size=1,cap="round",join="round") => {
@@ -224,6 +233,12 @@ export const animation = () => {
  * @param {number} [y] - bruit en y (optionnel si non défini = x)
  * @param {number} n - lissage 
  */
+/**
+ * set the noise for drawing functions
+ * @param.en {number} x - noise in x
+ * @param.en {number} [y] - noise in y (optional if not defined = x)
+ * @param.en {number} n - smoothing 
+ */
 
 export const bruit = (x=1,y,n=60) => {
   PX = x;
@@ -341,6 +356,12 @@ const createLine = (x1, y1, x2, y2, stroke = currentStroke,strokeWidth = current
  * @example couleur("red",MonCercle)
  * @example couleur("red",[MonCercle,MonRectangle])
  * @example couleur("red")
+ * line color
+ * @param.en {String} stroke line color
+ * @param.en {Element} elements optional, accepts an element or an array of elements
+ * @example.en color("red",MyCircle)
+ * @example.en color("red",[MyCircle,MyRectangle])
+ * @example.en color("red")
  */
 
 export const couleur = (stroke = currentStroke, elements) => {
@@ -368,6 +389,13 @@ export const couleur = (stroke = currentStroke, elements) => {
  * @example epaisseur(2,MonCercle)
  * @example epaisseur(2,[MonCercle,MonRectangle])
  * @example epaisseur(2)
+ * line thickness
+ * @param.en {Number} width - line thickness
+ * @param.en {Element} elements - optional, accepts an element or an array of elements
+ * @returns 
+ * @example.en thickness(2,MyCircle)
+ * @example.en thickness(2,[MyCircle,MyRectangle])
+ * @example.en thickness(2)
  */
 export const epaisseur = (width = 1, elements) => {
   if(elements === undefined){
@@ -430,6 +458,13 @@ const  unwrapChild = (element) => {
  * @param {string} color couleur de la trame currentStroke
  * @param {number} precision précision de la trame entre 0.01 et 1
  * @returns element groupe SVG
+ * hatch an SVG element
+ * @param.en {element} element SVG element or group of elements
+ * @param.en {number} space space between lines
+ * @param.en {number} alpha angle in degrees
+ * @param.en {string} color color of the grid currentStroke
+ * @param.en {number} precision grid precision between 0.01 and 1
+ * @returns.en {element} SVG group
  */
 
 export const tramer = (element,space = 15, alpha = 45, color = currentStroke, precision = 0.25) => {
@@ -530,6 +565,14 @@ export const tramer = (element,space = 15, alpha = 45, color = currentStroke, pr
  * @param {number} sizeMax taille finale des points 
  * @param {string} color couleur des points (fond et contour) 
  * @returns 
+ * 
+ * @param.en {element} element SVG element or group of elements
+ * @param.en {number} space space between points
+ * @param.en {number} angle angle in degrees
+ * @param.en {number} sizeMin size of the points
+ * @param.en {number} sizeMax final size of the points
+ * @param.en {string} color color of the points (fill and stroke)
+ * @returns.en 
  */
 export const tramerEnPoints = (element,space = 15, angle = 45, sizeMin = 1, sizeMax = 1, color = currentStroke) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -611,7 +654,17 @@ const convertCenter = (element,x,y) => {
  * @returns element chemin SVG
  * @example tracerLEtoile(1,1,5,2,1)
  * @example tracerLEtoile(A,1,5,2,1)
- * @example tracerLEtoile(A,B,5,2,1)
+ * @example tracerLEtoile(A,B,5,2,1) 
+ * draw the star
+ * @param.en {number} x x position
+ * @param.en {number} y y position
+ * @param.en {number} nb number of branches
+ * @param.en {number} r1 radius 1
+ * @param.en {number} r2 radius 2
+ * @returns.en element SVG path
+ * @example.en drawStar(1,1,5,2,1)
+ * @example.en drawStar(A,1,5,2,1)
+ * @example.en drawStar(A,B,5,2,1)
  */
 export const tracerLEtoile = (x,y,nb=5,r1=2,r2=1) => {
   x = isNaN(x) ? (x.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 :  x*50;
@@ -645,7 +698,15 @@ export const tracerLEtoile = (x,y,nb=5,r1=2,r2=1) => {
  * @param {number} r rayon 
  * @returns element chemin SVG
  * @example tracerLePolygone(1,1,3,1)
- * @example tracerLePolygone(A,1,3,1)
+ * @example tracerLePolygone(A,1,3,1) 
+ * draw the polygon
+ * @param.en {number} x x position
+ * @param.en {number} y y position
+ * @param.en {number} nb number of sides
+ * @param.en {number} r radius
+ * @returns.en element SVG path
+ * @example.en drawPolygon(1,1,3,1)
+ * @example.en drawPolygon(A,1,3,1)
  */
 export const tracerLePolygone = (x,y,nb=3,r=1) => {
   x = isNaN(x) ? (x.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 :  x*50;
@@ -722,7 +783,10 @@ $result.appendChild($SVG);
 /**
  * affiche la grille les lettres et les chiffres
  * @param {number} n nombre de lignes, 26 par défaut
- * @param {boolean} numeric afficher les chiffres (true) ou les lettres (false)
+ * @param {boolean} numeric afficher les chiffres (true) ou les lettres (false) 
+ * display the grid with letters and numbers
+ * @param.en {number} n number of lines, 26 by default
+ * @param.en {boolean} numeric display numbers (true) or letters (false)
  */
 
 export const afficherLaGrille = (n=26,numeric = false) => {
@@ -814,7 +878,11 @@ const isNum = (n) => !isNaN(parseFloat(n)) && isFinite(n);
  * crayon dessiner avec des coordonnées relatives
  * @param {string} cmd liste de commandes PC X Y poser crayon en X Y et AV X Y avancer de X Y
  * @returns element element SVG
- * @example crayon("PC 10 10 AV 1 1 AV 0 1 AV 0 -8")
+ * @example crayon("PC 10 10 AV 1 1 AV 0 1 AV 0 -8") 
+ * pencil draw with relative coordinates
+ * @param.en {string} cmd list of commands PC X Y place pencil at X Y and AV X Y move forward by X Y
+ * @returns.en element SVG element
+ * @example.en pencil("PC 10 10 AV 1 1 AV 0 1 AV 0 -8")
  */
 export const crayon = (cmd) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -877,7 +945,10 @@ export const crayon = (cmd) => {
 /**
  * tortue - dessiner avec des commandes relatives
  * @param {string} cmd liste de commande 
- * @returns element element SVG
+ * @returns element element SVG 
+ * turtle - draw with relative commands
+ * @param.en {string} cmd list of commands
+ * @returns.en element SVG element
  */
 export const tortue = (cmd) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1004,6 +1075,12 @@ const formatPoints = (points,close) => {
  * @returns string attribut d
  * @example spline(A,1,C,9,E,3)
  * @example spline(1,1,3,9,5,3)
+ * create the Catmull-Rom spline
+ * @param.en {points} points x1,y1,x2,y2,x3,y3…
+ * @param.en {tension} tension
+ * @returns.en string attribute d
+ * @example.en spline(A,1,C,9,E,3)
+ * @example.en spline(1,1,3,9,5,3)
  */
 const pointsToSpline = (points) => {
     const close = (points[0] === points[points.length - 2] && points[1] === points[points.length - 1]);
@@ -1061,7 +1138,12 @@ const pointsToSpline = (points) => {
  * @param {...number} points x1,y1,x2,y2,x3,y3…
  * @returns svgElement path
  * @example tracerLaSpline(A,1,C,9,E,3)
- * @example tracerLaSpline(1,1,3,9,5,3)
+ * @example tracerLaSpline(1,1,3,9,5,3) 
+ * draw the Catmull-Rom spline
+ * @param.en {...number} points x1,y1,x2,y2,x3,y3…
+ * @returns.en svgElement path
+ * @example.en drawCatmullRomSpline(A,1,C,9,E,3)
+ * @example.en drawCatmullRomSpline(1,1,3,9,5,3)
  */
 export const tracerLaSpline = (...points) => {
   
@@ -1094,7 +1176,12 @@ export const tracerLaSpline = (...points) => {
  * @param {...number} points x1,y1,x2,y2,x3,y3…
  * @returns svgElement polyline
  * @example relierLesPoints(A,1,C,9,E,3)
- * @example relierLesPoints(1,1,3,9,5,3)
+ * @example relierLesPoints(1,1,3,9,5,3) 
+ * connect the points
+ * @param.en {...number} points x1,y1,x2,y2,x3,y3…
+ * @returns.en svgElement polyline
+ * @example.en connectPoints(A,1,C,9,E,3)
+ * @example.en connectPoints(1,1,3,9,5,3)
  */
 export const relierLesPoints = (...points) => {
   // convert coord points
@@ -1119,7 +1206,12 @@ export const relierLesPoints = (...points) => {
  * @param {...any} points x1,y1,x2,y2,x3,y3…
  * @returns svgElement polyline
  * @example relierLesPoints(A,1,C,9,E,3)
- * @example relierLesPoints(1,1,3,9,5,3)
+ * @example relierLesPoints(1,1,3,9,5,3) 
+ * connect the points
+ * @param.en {...any} points x1,y1,x2,y2,x3,y3…
+ * @returns.en svgElement polyline
+ * @example.en connectPoints(A,1,C,9,E,3)
+ * @example.en connectPoints(1,1,3,9,5,3)
  */
 export const tracerLesLignes = relierLesPoints;
 
@@ -1128,7 +1220,12 @@ export const tracerLesLignes = relierLesPoints;
  * @param {number} x position du centre x
  * @param {number} y position du centre y
  * @param {number} r rayon
- * @returns element chemin SVG
+ * @returns element chemin SVG 
+ * draw the circle
+ * @param.en {number} x center x position
+ * @param.en {number} y center y position
+ * @param.en {number} r radius
+ * @returns.en element SVG path
  */
 export const tracerLeCercle = (x=1,y=1,r=1) => {
   // convert coord points
@@ -1163,6 +1260,12 @@ export const tracerLeCercle = (x=1,y=1,r=1) => {
  * @param {number} w largeur 
  * @param {number} h hauteur 
  * @returns {element} chemin SVG
+ * draw the rectangle
+ * @param.en {number} x top-left corner x position
+ * @param.en {number} y top-left corner y position
+ * @param.en {number} w width
+ * @param.en {number} h height
+ * @returns.en {element} SVG path
  */
 
 export const tracerLeRectangle = (x=1,y=1,w=1,h=1) => {
@@ -1232,7 +1335,15 @@ const shapeIsClosed = (path,tolerance = 0.01) => {
  * @param {number} scale la taille du clone 
  * @param {string} ease l'effet de taille 
  * @param {number} repeat nombre de répétition de l'effet
- * @returns {element} groupe SVG
+ * @returns {element} groupe SVG 
+ * traverse a path with an element
+ * @param.en {element} line the path to follow
+ * @param.en {element} brush the element to clone along the path
+ * @param.en {number} step the number of clones
+ * @param.en {number} scale the size of the clone
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
  */
 export const parcourir = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1318,7 +1429,15 @@ export const parcourir = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => 
  * @param {number} scale la taille du clone
  * @param {string} ease l'effet de taille
  * @param {number} repeat nombre de répétition de l'effet
- * @returns {element} groupe SVG
+ * @returns {element} groupe SVG 
+ * traverse a path with an element and zero angle
+ * @param.en {element} line the path to follow
+ * @param.en {element} brush the element to clone along the path
+ * @param.en {number} step the number of clones
+ * @param.en {number} scale the size of the clone
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
  */
 export const drapeau = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1379,7 +1498,16 @@ export const drapeau = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
  * @param {number} angle l'angle ajouté 
  * @param {string} ease l'effet de taille 
  * @param {number} repeat nombre de répétition de l'effet 
- * @returns {element} groupe SVG
+ * @returns {element} groupe SVG 
+ * calligram text along a path
+ * @param.en {element} line the path to follow
+ * @param.en {string} text the text to write
+ * @param.en {number} step the number of text repetitions
+ * @param.en {number} scale the size of the text
+ * @param.en {number} angle the added angle
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
  */
 export const calligrammer = (line, text,step = 1,scale = 1,angle = 0, ease,repeat = 4) => {
   // convert text to array of letter
@@ -1402,7 +1530,16 @@ export const calligrammer = (line, text,step = 1,scale = 1,angle = 0, ease,repea
  * @param {string} ease l'effet de taille
  * @param {number} repeat nombre de répétition de l'effet
  * @returns {element} groupe SVG
- * @example parcourSup(line,{brosses:[brush1,brush2],angle:90,remove:true},100,1/2,"sinus+0",4)
+ * @example parcourSup(line,{brosses:[brush1,brush2],angle:90,remove:true},100,1/2,"sinus+0",4) 
+ * traverse a path with a list of SVG elements
+ * @param.en {element} line the path to follow
+ * @param.en {object} obj list of elements to clone along the path
+ * @param.en {number} step the number of clones
+ * @param.en {number} scale the size of the clone
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
+ * @example.en traversePath(line,{brushes:[brush1,brush2],angle:90,remove:true},100,1/2,"sine+0",4)
  */
 
 export const parcourSup = (line,obj,step = 100,scale = 1/2,ease,repeat = 4) => {
@@ -1507,7 +1644,15 @@ export const parcourSup = (line,obj,step = 100,scale = 1/2,ease,repeat = 4) => {
  * @param {number} angle1 angle de départ en degrés
  * @param {number} angle2 angle de fin en degrés
  * @returns {element} chemin SVG
- * @example tracerLArc(1,1,1,0,90)
+ * @example tracerLArc(1,1,1,0,90) 
+ * draw the arc
+ * @param.en {number} x center x position
+ * @param.en {number} y center y position
+ * @param.en {number} r radius
+ * @param.en {number} angle1 start angle in degrees
+ * @param.en {number} angle2 end angle in degrees
+ * @returns.en {element} SVG path
+ * @example.en drawArc(1,1,1,0,90)
  */
 
 export const tracerLArc = (x,y,r=1,angle1=0,angle2=90) => {
@@ -1541,7 +1686,16 @@ export const tracerLArc = (x,y,r=1,angle1=0,angle2=90) => {
  * @param {number} my marges en y
  * @param {number} scale échelle
  * @param {string} ease effet de taille
- * @param {number} repeat nombre de répétition de l'effet
+ * @param {number} repeat nombre de répétition de l'effet 
+ * place on a grid
+ * @param.en {element} brush elements to clone
+ * @param.en {number} nx number of columns
+ * @param.en {number} ny number of rows
+ * @param.en {number} mx margins in x
+ * @param.en {number} my margins in y
+ * @param.en {number} scale scale
+ * @param.en {string} ease size effect
+ * @param.en {number} repeat number of repetitions of the effect
  */
 export const placerSurGrille = (brush,nx,ny,mx=1,my=1,scale=1, ease,repeat = 1) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1593,12 +1747,6 @@ export const placerSurGrille = (brush,nx,ny,mx=1,my=1,scale=1, ease,repeat = 1) 
   points.forEach((point, index) => {
     let pos = (index * (1/points.length)*2*repeat)%2;
     pos = (pos>1)?2-pos:pos;
-    // let pos = 1/points.length*index;
-    // console.error(index,pos,easeFn(pos));
-
-    // let c = createCircle(point.x, point.y, 1, "red");
-    // $SVG.appendChild(c);
-    // clone brush
     let b = brush[index%brush.length].cloneNode(true);
     b.cx = brush[index%brush.length].cx;
     b.cy = brush[index%brush.length].cy;
@@ -1618,6 +1766,8 @@ export const placerSurGrille = (brush,nx,ny,mx=1,my=1,scale=1, ease,repeat = 1) 
 /**
  * au hasard entre 1 et n inclus
  * @returns {number} un nombre aléatoire entre 1 et 26 (ou moins si grille plus petite)
+ * random between 1 and n inclusive
+ * @returns.en {number} a random number between 1 and 26 (or less if the grid is smaller)
  */
 
 export const auHasard = (x=NAZ) => gsap.utils.random(1, x, 1);
@@ -1626,11 +1776,17 @@ export const auHasard = (x=NAZ) => gsap.utils.random(1, x, 1);
  *  suppression d'un ou plusieurs éléments
  * @param  {...any} elements
  * @returns void
- *  
- * @example
+ * * @example
  * supprimer(element1,element2);
  * supprimer(element1);
- * supprimer(element1,element2,element3);
+ * supprimer(element1,element2,element3); 
+ *  delete one or more elements
+ * @param.en  {...any} elements
+ * @returns.en void
+ * * @example.en
+ * delete(element1,element2);
+ * delete(element1);
+ * delete(element1,element2,element3);
  */
 export const supprimer = (...elements) => {
   // element to array
@@ -1651,7 +1807,14 @@ export const supprimer = (...elements) => {
  * @param {number} y position y 
  * @param {number} scale échelle 
  * @returns {element} groupe SVG
- * @example tracerLeParagraphe(`Hello World`,1,1,0.8)
+ * @example tracerLeParagraphe(`Hello World`,1,1,0.8) 
+ * draw the paragraph
+ * @param.en {string} text text to draw with \` for line breaks 
+ * @param.en {number} x x position 
+ * @param.en {number} y y position 
+ * @param.en {number} scale scale 
+ * @returns.en {element} SVG group
+ * @example.en drawParagraph(`Hello World`,1,1,0.8)
  */
 export const tracerLeParagraphe = (text,x=1,y=1,scale = 0.8) => {
   let lines = text.split("\n");
@@ -1666,12 +1829,17 @@ export const tracerLeParagraphe = (text,x=1,y=1,scale = 0.8) => {
 
 /**
  * tracer le texte sur une ligne
- * @param {string} text texte à tracer  
- * @param {number} x position x 
+ * @param {string} text texte à tracer * @param {number} x position x 
  * @param {number} y position y 
  * @param {number} scale échelle 
  * @returns {element} groupe SVG
- * @example tracerLeTexte("Hello World",1,1,0.8)
+ * @example tracerLeTexte("Hello World",1,1,0.8) 
+ * draw the text on a line
+ * @param.en {string} text text to draw * @param.en {number} x x position 
+ * @param.en {number} y y position 
+ * @param.en {number} scale scale 
+ * @returns.en {element} SVG group
+ * @example.en drawText("Hello World",1,1,0.8)
  */
 
 export const tracerLeTexte = (text,x=1,y=1,scale = 0.8, noise = false) => {
@@ -1688,7 +1856,10 @@ export const tracerLeTexte = (text,x=1,y=1,scale = 0.8, noise = false) => {
 /**
  * courber un chemin
  * @param {element} line chemin à courber 
- * @param {number} curviness courbure (1 par défaut)
+ * @param {number} curviness courbure (1 par défaut) 
+ * curve a path
+ * @param.en {element} line path to curve
+ * @param.en {number} curviness curvature (default is 1)
  */
 export const courber = (line,curviness = 1) => {
   // convert path to anchors {x,y}
@@ -1707,7 +1878,12 @@ export const courber = (line,curviness = 1) => {
  * @param {element} line chemin à adoucir
  * @param {number} curviness courbure (1 par défaut)
  * @returns {element} chemin SVG
- * @example adoucir(path,1)
+ * @example adoucir(path,1) 
+ * smooth a path
+ * @param.en {element} line path to smooth
+ * @param.en {number} curviness curvature (default is 1)
+ * @returns.en {element} SVG path
+ * @example.en smooth(path,1)
  */
 export const adoucir = (line,curviness = 1) => {
   if(line.tagName !== "path"){
@@ -1730,7 +1906,18 @@ export const adoucir = (line,curviness = 1) => {
  * @param {boolean} flip inverser x et y
  * @returns {element} chemin SVG
  * @example tracerLEquation("x^2",1,1,1,10,1,false)
- * @example tracerLEquation("sinus(x*50)",1,10)
+ * @example tracerLEquation("sinus(x*50)",1,10) 
+ * draw a mathematical equation
+ * @param.en {string} fx mathematical equation
+ * @param.en {number} ox x origin
+ * @param.en {number} oy y origin
+ * @param.en {number} start start of the curve
+ * @param.en {number} end end of the curve
+ * @param.en {number} precision precision
+ * @param.en {boolean} flip flip x and y
+ * @returns.en {element} SVG path
+ * @example.en drawEquation("x^2",1,1,1,10,1,false)
+ * @example.en drawEquation("sin(x*50)",1,10)
  */
 export const tracerLEquation = (fx,ox=1,oy=1,debut=1,fin=NAZ,precision = 1,flip=false) => {
   let points = [];
@@ -1807,7 +1994,12 @@ export const aide = () => {
  * @param {element} element1
  * @param {element} element2
  * @returns {element} chemin SVG
- * @example fusionner(path1,path2)
+ * @example fusionner(path1,path2) 
+ * merge two path elements
+ * @param.en {element} element1
+ * @param.en {element} element2
+ * @returns.en {element} SVG path
+ * @example.en merge(path1,path2)
  */
 
 export const fusionner = (element1,element2) => {
@@ -1824,7 +2016,11 @@ export const fusionner = (element1,element2) => {
  * tourner un élément
  * @param {element} element 
  * @param {number} angle angle de rotation en degrés
- * @example tourner(element,90) 
+ * @example tourner(element,90)  
+ * rotate an element
+ * @param.en {element} element 
+ * @param.en {number} angle rotation angle in degrees
+ * @example.en rotate(element,90) 
  */
 export const tourner = (element,angle) => {
   if(element.dataset.center){
@@ -1838,7 +2034,11 @@ export const tourner = (element,angle) => {
  * déplacer un élément
  * @param {element} element 
  * @param {number} x 
- * @param {number} y 
+ * @param {number} y  
+ * move an element
+ * @param.en {element} element 
+ * @param.en {number} x 
+ * @param.en {number} y 
  */
 export const deplacer = (element,x,y) => {
   element.dataset.dx = x;
@@ -1852,7 +2052,13 @@ export const deplacer = (element,x,y) => {
  * @param {number} [x] 0 par défaut
  * @param {number} [y] 0 par défaut
  * @returns {element} élément cloné
- * @example cloner(element,1,1)
+ * @example cloner(element,1,1) 
+ * clone an element and move it
+ * @param.en {element} element
+ * @param.en {number} [x] 0 by default
+ * @param.en {number} [y] 0 by default
+ * @returns.en {element} cloned element
+ * @example.en clone(element,1,1)
  */
 export const cloner = (element,x=0,y=0) => {
   let clone = element.cloneNode(true);
@@ -1865,7 +2071,11 @@ export const cloner = (element,x=0,y=0) => {
  * groupe les éléments
  * @param  {...any} elements
  * @returns {element} groupe SVG
- * @example grouper(element1,element2,element3)
+ * @example grouper(element1,element2,element3) 
+ * group the elements
+ * @param.en  {...any} elements
+ * @returns.en {element} SVG group
+ * @example.en groupElements(element1,element2,element3)
  */
 export const grouper = (...elements) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1885,6 +2095,12 @@ export const grouper = (...elements) => {
  * @returns {number} cosinus de l'angle
  * @example cosinus(90)
  */
+/**
+ * cosine
+ * @param.en {number} angle in degrees
+ * @returns.en {number} cosine of the angle
+ * @example.en cosine(90)
+ */
 
 export const cosinus = (angle) => Math.cos(deg2rad(angle));
 
@@ -1894,9 +2110,20 @@ export const cosinus = (angle) => Math.cos(deg2rad(angle));
  * @returns {number} sinus de l'angle
  * @example sinus(90)
  */
+/**
+ * sine
+ * @param.en {number} angle in degrees
+ * @returns.en {number} sine of the angle
+ * @example.en sine(90)
+ */
 export const sinus = (angle) => Math.sin(deg2rad(angle));
 
-
+/**
+ * sauvegarde en png
+ * @param {string} name le nom du fichier  
+ * save as png
+ * @param.en {string} name the file name
+ */
 export const png = async (name="dessin") =>{
   // waiting 1s
   // const timer = await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1922,8 +2149,19 @@ export const png = async (name="dessin") =>{
   };
 }
 
+/**
+ * pour changer la langue (english, français)
+ * @param {string} text 
+ */
+/**
+ * to change the language (english, french)
+ * @param.en {string} text 
+ */
+
 export const langue = (text) => {
-    localStorage.setItem('language', text.slice(0,2));
+  if(text.slice(0,2) === "fr") console.log('veuillez rafrachir la page pour changer la langue');
+  if(text.slice(0,2) === "en") console.log('please refresh the page to change the language');
+  localStorage.setItem('language', text.slice(0,2));
 }
 
 

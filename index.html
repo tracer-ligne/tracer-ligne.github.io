@@ -59,6 +59,7 @@
 
   <script type="module">
     import {$SVG,iniMain} from './main.js'; 
+    import {makeScript} from './makeScript.js';
 
     const language = localStorage.getItem('language') || 'fr';
     const functionNames= {
@@ -121,12 +122,59 @@
       'afficherLaGrille();'
     ].join('\n');
 
+/**
+ * Nettoie et filtre le JSDoc bilingue en fonction de la langue
+ * 
+ * @param {string} jsDoc - Le commentaire JSDoc bilingue
+ * @param {string} language - La langue souhaitée ('fr' ou 'en')
+ * @returns {string} Le commentaire JSDoc nettoyé pour la langue spécifiée
+ */
+ function filterBilingualJSDoc(jsDoc, language) {
+  // Diviser le code en lignes
+  const lines = jsDoc.split('\n');
 
+  // Filtrer les lignes en fonction de la langue
+  const filteredLines = lines.filter((line,index,array) => {
+    const isPreviousLineCommentStart = index > 0 && array[index - 1].trim().match(/\/\*\*/) !== null;
+
+    if (!line.trim().match(/^\s*\*\s*@/) 
+        && !line.trim().match(/\/\*\*/) 
+        && !line.trim().match(/\*\s/)
+        && !line.trim().match(/\*\//)){
+      return true;
+    }
+    if(language ==="fr" && array[index - 1].trim().match(/^\s*\*\s*@/) !== null && line.trim().match(/^\s*\*\s*\w+/) !== null){
+      return false;
+    }
+    //  Pour le français, supprimer les lignes se terminant par .en
+    if (language === 'fr') {
+      return !line.match(/@\w+\.en\b/);
+    }
+
+    if(language === 'en' && isPreviousLineCommentStart){
+      return false;
+    }
+
+    // Pour l'anglais, supprimer les lignes sans .en
+    if (language === 'en') {
+      return !line.match(/@\w+(?!\.\w+)\s/);
+    }
+    // Par défaut, conserver toutes les lignes
+    return true;
+  });
+
+  // Supprimer les extensions linguistiques restantes (.fr ou .en)
+  const cleanedLines = filteredLines.map(line => line.replace(/@(\w+)\.(\w+)(.*)/g, '@$1$3'));
+  // Reconstruire le code 
+  return cleanedLines.join('\n');
+}
   
 
-    const externalScriptContent =  await fetch('main.js').then(response => response.text());
+    let externalScriptContent =  await fetch('main.js').then(response => response.text());
+
+    externalScriptContent = filterBilingualJSDoc(externalScriptContent, language);
+
     // replace 'export *any space* const' to 'const'
-    // remove import 
     const externalScript = externalScriptContent.replace(/export\s*const/g, 'const').replace(/import\s*{.*}.*from.*;/g, '');
 
     /* english mode */
@@ -345,21 +393,7 @@
           }
         }
 
-
-
-
-       
-        // english version
-        // transform function names to english
-        let fr = Object.keys(functionNames).join(', ');
-        let eng = Object.entries(functionNames).map(([key, value]) => `${key} as ${value}`).join(', ');
-        script.textContent = `import {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z} from './main.js';`;
-        script.textContent += `import{ ${fr}, ${eng} } from './main.js';`
-        script.textContent += `${code}`;
-        script.textContent += ` ; `;
-        script.textContent += `if(document.querySelector('#result #grid')!==null) gsap.from('#result #grid line', {duration:${DURATION}, drawSVG: '0%', stagger:${STAGGER} });gsap.from('#result svg>*,g.draw>*', {duration: ${DURATION}, drawSVG: '0%', stagger: ${STAGGER}});if(document.querySelector('#result g.trame')!==null) gsap.from('#result svg g.trame>*', {duration:${DURATION/2}, drawSVG: '0%', stagger: ${STAGGER}})`;
-        
-
+        makeScript(script,functionNames,code,DURATION,STAGGER);
 
         // wait 300ms before running the script
         setTimeout(() => {
