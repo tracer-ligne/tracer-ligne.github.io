@@ -412,7 +412,7 @@
     
     window.onerror = function(message, source, lineno, colno, error) {
         // Crée un élément pour afficher l'erreur
-        if(source !== "") $errorItem.innerHTML += "<br><strong>Erreur:</strong> " + message + " - Ligne: " + (parseInt(lineno)-2)+ "<br>";
+        if(source !== "") $errorItem.innerHTML += "<br><strong>Erreur:</strong> " + message + " - Ligne: " + (parseInt(lineno))+ "<br>";
      
     };
 
