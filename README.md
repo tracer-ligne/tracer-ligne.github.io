@@ -15,7 +15,7 @@ Les dessins sont prêt à être tracés.
 
 ## Comment ça marche ?
 Il suffit de se rendre sur la page [tracer-ligne.github.io](https://tracer-ligne.github.io) et de commencer à coder.
-Une aide est disponible ici : https://tracer-ligne.github.io/doc/
+* Une aide est disponible ici : https://tracer-ligne.github.io/doc/
 
 ## Techniquement ?
 L'éditeur de code est basé sur Monaco Editor.
@@ -37,7 +37,7 @@ The drawings are ready to be traced.
 ## How does it work?
 Just go to the page [tracer-ligne.github.io](https://tracer-ligne.github.io) and start coding.
 * `language('en')` and refresh to switch to English
-Help is available here: https://tracer-ligne.github.io/doc-en/
+* Help is available here: https://tracer-ligne.github.io/doc-en/
 
 ## Technically?
 The code editor is based on Monaco Editor.
