@@ -17,6 +17,57 @@ let tension = 1;
 let din = false;
 const NS = 'http://www.w3.org/2000/svg';
 
+export const functionNames= {
+  'adoucir': '_soften',
+  'aide': 'help',
+  'afficherLaGrille': 'showGrid',
+  'animation': 'animate',
+  'auHasard': 'random',
+  'bruit': 'noise',
+  'calligrammer': 'calligram',
+  'cosinus': 'cosine',
+  'courber': 'bend',
+  'couleur': 'color',
+  'cloner': 'clone',
+  'crayon': 'pencil',
+  'deplacer': 'move',
+  'drapeau': 'flag',
+  'epaisseur': 'thickness',
+  'formatDin' : 'dinFormat',
+  'fusionner': 'merge',
+  'grouper': 'group',
+  'inverserLeSens': 'reverseDirection',
+  'placerSurGrille': 'placeOnGrid',
+  'extrude' : '_extrude',
+  'parcourir': 'traverse',
+  'parcourSup': 'traverseSup',
+  'relierLesPoints': 'connectPoints',
+  'sinus': 'sine',
+  'supprimer': 'remove',
+  'tensionDeSpline': 'splineTension',
+  'tramer': 'weave',
+  'tramerEnPoints': 'stipple',
+  'tortue': 'turtle',
+  'tracerLeTexte': 'drawText',
+  'tracerLeParagraphe': 'drawParagraph',
+  'tourner': 'turn',
+  'tracerLArc': 'drawArc',
+  'tracerLesLignes': 'drawLines',
+  'tracerLaSpline': 'drawSpline',
+  'tracerLePolygone': 'drawPolygon',
+  'tracerLeRectangle': 'drawRectangle',
+  'tracerLeCercle': 'drawCircle',
+  'tracerLEllipse': 'drawEllipse',
+  'tracerLEquation': 'drawEquation',
+  'tracerLEtoile': 'drawStar',
+  'tracerLEquation': 'drawEquation',
+  'tracerLeContour': 'drawOutline',
+  'appliquerLesTransformations': 'applyTransformations',
+  'png':'_png',
+  'langue':'language',
+};
+
+
 /**
  * inverser le sens du chemin SVG
  * @param {Element} element - Element SVG
@@ -1255,6 +1306,51 @@ export const tracerLeCercle = (x=1,y=1,r=1) => {
 }
 
 
+/**
+ * tracer l'ellipse
+ * @param {number} x position du centre x
+ * @param {number} y position du centre y
+ * @param {number} rx rayon horizontal
+ * @param {number} ry rayon vertical
+ * @returns element chemin SVG
+ * draw the ellipse
+ * @param.en {number} x center x position
+ * @param.en {number} y center y position
+ * @param.en {number} rx radius
+ * @param.en {number} ry radius
+ * @returns.en element SVG path
+ */
+
+export const tracerLEllipse = (x=1,y=1,rx=2, ry=1) => {
+  // convert coord points
+  x = isNaN(x) ? (x.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 :  x*50;
+  y = isNaN(y) ? (y.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 :  y*50;
+  rx = rx*50;
+  ry = ry*50;
+
+  const ellipse = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  // circle.setAttribute("d", `M${x} ${y} m-${r} 0 a${r} ${r} 0 1 0 ${r*2} 0 a${r} ${r} 0 1 0 -${r*2} 0`);
+  const k = 0.552284749831; // Approximation pour les courbes cubiques
+  const cpOffsetX = rx * k; // Contrôle pour l'axe horizontal
+  const cpOffsetY = ry * k; // Contrôle pour l'axe vertical
+
+  const moveTo = `M ${x} ${y - ry}`;
+  const cubic1 = `C ${x + cpOffsetX} ${y - ry} ${x + rx} ${y - cpOffsetY} ${x + rx} ${y}`;
+  const cubic2 = `C ${x + rx} ${y + cpOffsetY} ${x + cpOffsetX} ${y + ry} ${x} ${y + ry}`;
+  const cubic3 = `C ${x - cpOffsetX} ${y + ry} ${x - rx} ${y + cpOffsetY} ${x - rx} ${y}`;
+  const cubic4 = `C ${x - rx} ${y - cpOffsetY} ${x - cpOffsetX} ${y - ry} ${x} ${y - ry}`;
+  const d = `${moveTo} ${cubic1} ${cubic2} ${cubic3} ${cubic4} Z`;
+
+
+  ellipse.setAttribute("d", d);
+  ellipse.setAttribute("fill", "none");
+  ellipse.setAttribute("stroke-width", currentWidth);
+  ellipse.setAttribute("stroke", currentStroke); 
+  $SVG.appendChild(ellipse);
+  return ellipse;
+}
+
+
 
 /**
  * tracer le rectangle
@@ -1348,80 +1444,123 @@ const shapeIsClosed = (path,tolerance = 0.01) => {
  * @param.en {number} repeat number of repetitions of the effect
  * @returns.en {element} SVG group
  */
-export const parcourir = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
+/**
+ * Fonction utilitaire pour manipuler un chemin avec un élément
+ * @param {element} line Le chemin à suivre
+ * @param {element} brush L'élément à cloner le long du chemin
+ * @param {number} step Le nombre de clones
+ * @param {number} scale La taille du clone
+ * @param {string} ease L'effet de taille
+ * @param {number} repeat Nombre de répétitions de l'effet
+ * @param {boolean} rotate Indique si les clones doivent être tournés en fonction du chemin
+ * @returns {element} Groupe SVG
+ */
+
+const manipulatePath = (line, brush, step = 100, scale = 1 / 2, ease, repeat = 4, rotate = false) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
   $G.setAttribute("class", "draw");
   $SVG.appendChild($G);
-  let plus = 0;
-  if(ease !== undefined){
-    // split at +
-    let split = ease.split("+");
-    ease = split[0];
-    plus = parseFloat(split[1]) || 0;
-  }
-
-
-  // ease
-  if(ease === "sinus"){
-    ease = "sine.inOut";
-  }
-  if(ease === "elastic"){
-    ease = "elastic.inOut";
-  }
-  if(ease === "cercle"){
-    ease = "circ.in";
-  }
-
-  const easeFn = (ease!==undefined) ? gsap.parseEase(ease) : x => 1;
-
-  // find the center of brush path
-  const brushCenter = brush.getBBox();
- 
-  if(brush.dataset.center){
-    brushCenter.x = brushCenter.x + brushCenter.width*brush.dataset.pcx/100;
-    brushCenter.y = brushCenter.y + brushCenter.height*brush.dataset.pcy/100;
-  }else{
-    brushCenter.x = brushCenter.x + brushCenter.width/2;
-    brushCenter.y = brushCenter.y + brushCenter.height/2;   
-  }
   
-  let isClosed = shapeIsClosed(line,0.01);
-  if(!isClosed) step--;
+  let plus = 0;
+  if (ease) {
+    const [easeName, plusValue] = ease.split("+");
+    ease = easeName;
+    plus = parseFloat(plusValue) || 0;
+  }
 
-  const points = pathPts(line, 1/step, true);
-  // if last point is the same as the first point remove it
-  if(points[0].x === points[points.length-1].x && points[0].y === points[points.length-1].y){
+  ease = {
+    "sinus": "sine.inOut",
+    "elastic": "elastic.inOut",
+    "cercle": "circ.in"
+  }[ease] || ease;
+
+  const easeFn = ease ? gsap.parseEase(ease) : x => 1;
+
+  const brushCenter = brush.getBBox();
+  if (brush.dataset.center) {
+    brushCenter.x += brushCenter.width * (brush.dataset.pcx / 100);
+    brushCenter.y += brushCenter.height * (brush.dataset.pcy / 100);
+  } else {
+    brushCenter.x += brushCenter.width / 2;
+    brushCenter.y += brushCenter.height / 2;
+  }
+
+  let isClosed = shapeIsClosed(line, 0.01);
+  if (!isClosed) step--;
+
+  const points = pathPts(line, 1 / step, rotate);
+  if (points[0].x === points[points.length - 1].x && points[0].y === points[points.length - 1].y) {
     points.pop();
   }
 
   points.forEach((point, index) => {
-    let pos = (index * (1/step)*2*repeat)%2;
-    pos = (pos>1)?2-pos:pos;
-    // let c = createCircle(point.x, point.y, 1, "red");
-    // $SVG.appendChild(c);
-    // clone brush
-    let b = brush.cloneNode(true);
-    b.setAttribute("stroke-width", currentWidth/(scale * easeFn(pos)));
-    // scale 1/10
-    if(b.dataset.center){
-      gsap.set(b,{x:point.x-brushCenter.x,
-        y:point.y-brushCenter.y,
-        rotate:point.angle+90,
-        scale:scale * easeFn(pos) + plus});
-    }else{
-      gsap.set(b,{x:point.x-brushCenter.x,
-        y:point.y-brushCenter.y,
-        rotate:point.angle+90,
-        scale:scale * easeFn(pos) + plus,
-        transformOrigin:"50% 50%"});
+    let pos = (index * (1 / step) * 2 * repeat) % 2;
+    pos = pos > 1 ? 2 - pos : pos;
+
+    const b = brush.cloneNode(true);
+    b.setAttribute("stroke-width", currentWidth / (scale * easeFn(pos)));
+    const transformOptions = {
+      x: point.x - brushCenter.x,
+      y: point.y - brushCenter.y,
+      scale: scale * easeFn(pos) + plus,
+    };
+    if (rotate) {
+      transformOptions.rotate = point.angle + 90;
     }
- 
+    gsap.set(b, { ...transformOptions, transformOrigin: "50% 50%" });
+
     $G.appendChild(b);
-
   });
-  $G.appendChild(line);
 
+  $G.appendChild(line);
   return $G;
+};
+
+
+/**
+ * extrude un élément sur un chemin
+ * @param {element} line le chemin à suivre
+ * @param {element} brush l'élément à cloner le long du chemin 
+ * @param {number} step le nombre de clone 
+ * @param {number} scale la taille du clone 
+ * @param {string} ease l'effet de taille 
+ * @param {number} repeat nombre de répétition de l'effet
+ * @returns {element} groupe SVG
+ * extrude an element on a path
+ * @param.en {element} line the path to follow
+ * @param.en {element} brush the element to clone along the path
+ * @param.en {number} step the number of clones
+ * @param.en {number} scale the size of the clone
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
+ */
+
+export const extrude = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
+  return manipulatePath(line, brush, step, scale, ease, repeat, false);
+}
+
+
+/**
+ * parcourir un chemin avec un élément
+ * @param {element} line le chemin à suivre
+ * @param {element} brush l'élément à cloner le long du chemin 
+ * @param {number} step le nombre de clone 
+ * @param {number} scale la taille du clone 
+ * @param {string} ease l'effet de taille 
+ * @param {number} repeat nombre de répétition de l'effet
+ * @returns {element} groupe SVG
+ * traverse a path with an element
+ * @param.en {element} line the path to follow
+ * @param.en {element} brush the element to clone along the path
+ * @param.en {number} step the number of clones
+ * @param.en {number} scale the size of the clone
+ * @param.en {string} ease the size effect
+ * @param.en {number} repeat number of repetitions of the effect
+ * @returns.en {element} SVG group
+ */
+export const parcourir = (line,brush,step = 100,scale = 1/2,ease,repeat = 4) => {
+  return manipulatePath(line, brush, step, scale, ease, repeat, true);
 }
 
 /**

@@ -58,57 +58,10 @@
 
 
   <script type="module">
-    import {$SVG,iniMain} from './main.js'; 
+    import {$SVG,iniMain,functionNames} from './main.js'; 
     import {makeScript} from './makeScript.js';
-
+  
     const language = localStorage.getItem('language') || 'fr';
-    const functionNames= {
-          'adoucir': '_soften',
-          'aide': 'help',
-          'afficherLaGrille': 'showGrid',
-          'animation': 'animate',
-          'auHasard': 'random',
-          'bruit': 'noise',
-          'calligrammer': 'calligram',
-          'cosinus': 'cosine',
-          'courber': 'bend',
-          'couleur': 'color',
-          'cloner': 'clone',
-          'crayon': 'pencil',
-          'deplacer': 'move',
-          'drapeau': 'flag',
-          'epaisseur': 'thickness',
-          'formatDin' : 'dinFormat',
-          'fusionner': 'merge',
-          'grouper': 'group',
-          'inverserLeSens': 'reverseDirection',
-          'placerSurGrille': 'placeOnGrid',
-          'parcourir': 'traverse',
-          'parcourSup': 'traverseSup',
-          'relierLesPoints': 'connectPoints',
-          'sinus': 'sine',
-          'supprimer': 'remove',
-          'tensionDeSpline': 'splineTension',
-          'tramer': 'weave',
-          'tramerEnPoints': 'stipple',
-          'tortue': 'turtle',
-          'tracerLeTexte': 'drawText',
-          'tracerLeParagraphe': 'drawParagraph',
-          'tourner': 'turn',
-          'tracerLArc': 'drawArc',
-          'tracerLesLignes': 'drawLines',
-          'tracerLaSpline': 'drawSpline',
-          'tracerLePolygone': 'drawPolygon',
-          'tracerLeRectangle': 'drawRectangle',
-          'tracerLeCercle': 'drawCircle',
-          'tracerLEquation': 'drawEquation',
-          'tracerLEtoile': 'drawStar',
-          'tracerLEquation': 'drawEquation',
-          'tracerLeContour': 'drawOutline',
-          'appliquerLesTransformations': 'applyTransformations',
-          'png':'_png',
-          'langue':'language',
-        };
 
     const $run = document.getElementById('run');
     if(language === 'en'){
@@ -348,38 +301,59 @@
         script.type = 'module';
 
         // find tortue(*)
-        const replaceLoop = input => {
+        const replaceLoop = (input,find = "boucler(") => {
+          const resultats = [];
+          let indexRecherche = 0;
           const openParens = (input.match(/\(/g) || []).length;
           const closeParens = (input.match(/\)/g) || []).length;
 
           // Vérifie si les parenthèses sont équilibrées
           if (openParens !== closeParens) {
-          console.log("Erreur : le nombre de parenthèses ouvrantes et fermantes n'est pas égal.");
-          return [];
+            trace("Erreur : le nombre de parenthèses ouvrantes et fermantes n'est pas égal.");
+            return [];
           }
+          
+          while (true) {
+            const indexOuverture = input.indexOf(find);
+            if (indexOuverture === -1) break;
 
-          let result = [];
-          let regex = /boucler\(([^()]*(?:\((?:[^()]*(?:\([^()]*\))?[^()]*)*\))?[^()]*)\)/g;
-          let match;
+            let compteurParentheses = 1;
+            let indexCourant = indexOuverture + find.length;
+            let indexParentheseFermante = -1;
 
-          // rechercher regex remplacer par "coucou"
+            while (indexCourant < input.length) {
+              if (input[indexCourant] === '(') {
+                compteurParentheses++;
+              } else if (input[indexCourant] === ')') {
+                compteurParentheses--;
+                
+                if (compteurParentheses === 0) {
+                  indexParentheseFermante = indexCourant;
+                  break;
+                }
+              }
+              
+              indexCourant++;
+            }
 
-          let code = input.replace(regex, (match, group1) => {
-          let loopThis = group1; // Utilisez `group1` capturé directement
-          let lastComma = loopThis.lastIndexOf(',');
-          let firstPart = loopThis.slice(0, lastComma);
-          let secondPart = parseInt(loopThis.slice(lastComma + 1));
+            // Si pas de parenthèse fermante trouvée, on arrête
+            if (indexParentheseFermante === -1) break;
 
-          // Utilisation de backticks pour inclure `firstPart` et `secondPart` dans un modèle de boucle
-          return `for(let i = 1; i <= ${secondPart}; i++) { ${firstPart} }`; 
-          }); 
-          return code; 
-          };
-        
-
+            // Récupérer le texte entre 'boucler(' et la parenthèse fermante
+            let texteInterieur = input.slice(indexOuverture + find.length, indexParentheseFermante);
+            const nombre = texteInterieur.split(',').filter(Boolean).pop().trim();
+            texteInterieur = texteInterieur.split(',').slice(0, -1).join(',');
+            // supprime le texte de indexOuverture à indexParentheseFermante
+            input = input.slice(0, indexOuverture) + input.slice(indexParentheseFermante + 1);
+            // ajoute "for(let i = 0; i < nombre; i++) {" à la place de indexOuverture
+            input = input.slice(0, indexOuverture) + `for(let i = 0; i < ${nombre}; i++) {` + texteInterieur + `} `+input.slice(indexOuverture);
+          }
+          return input;
+        };
         // remplacer boucler(xxxxxxx,N) par for(let i=0; i<N; i++){xxxxxxx}
         // code = code.replace(/boucler\((\s*.*?\))\s*,\s*(\d*)\s*(\)\s*)/g, 'for(let i=1; i<=$2; i++){$1}');
         code = replaceLoop(code);
+        code = replaceLoop(code,'loop(');
         
         // find animation(float,float) in code and get the number to set the duration
         let match = code.match(/animation\((\d*\.?\d*)\s*,\s*(\d*\.?\d*)\)/);
