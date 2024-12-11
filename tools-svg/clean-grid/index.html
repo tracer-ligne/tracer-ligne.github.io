@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outil SVG</title>
+  <style>
+    body {
+      font-family: monospace;
+      text-align: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    #drop-zone {
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      color: #aaa;
+    }
+    #drop-zone.hover {
+      border-color: #000;
+      color: #000;
+    }
+
+    #querySelector {
+      margin: 20px;
+      padding: 5px;
+      font-size: 16px;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Outil SVG</h1>
+  <p>Supprimez les éléments correspondant à un sélecteur dans un fichier SVG.</p>
+  <label for="querySelector">Sélecteur:</label>
+  <input type="text" id="querySelector" name="querySelector" value="#grid">
+  <div id="drop-zone">Glissez vos fichiers SVG ici</div>
+  <script>
+    const dropZone = document.querySelector('#drop-zone');
+    
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('hover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('hover');
+    });
+
+    dropZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('hover');
+      
+      const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'image/svg+xml');
+      const querySelector = document.querySelector('#querySelector').value.trim();
+
+      for (const file of files) {
+        const fileContent = await file.text();
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(fileContent, 'image/svg+xml');
+        const elements = svgDoc.querySelectorAll(querySelector);
+
+        // Supprimer les éléments correspondant au sélecteur
+        elements.forEach(el => el.remove());
+
+        // Convertir le SVG modifié en une chaîne
+        const serializer = new XMLSerializer();
+        const updatedSVG = serializer.serializeToString(svgDoc);
+
+        // Télécharger le fichier modifié
+        const blob = new Blob([updatedSVG], { type: 'image/svg+xml' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = file.name; // Utilisation du nom d'origine
+        a.click();
+      }
+    });
+  </script>
+</body>
+</html>
