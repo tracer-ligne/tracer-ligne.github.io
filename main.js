@@ -52,6 +52,7 @@ export const functionNames= {
   'tracerLeParagraphe': 'drawParagraph',
   'tourner': 'turn',
   'tracerLArc': 'drawArc',
+  'tracerLArcDonut' : 'drawArcDonut',
   'tracerLesLignes': 'drawLines',
   'tracerLaSpline': 'drawSpline',
   'tracerLePolygone': 'drawPolygon',
@@ -520,6 +521,7 @@ const  unwrapChild = (element) => {
 
 export const tramer = (element,space = 15, alpha = 45, color = currentStroke, precision = 0.25) => {
   const $G = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  alpha = - alpha -90;
   $G.setAttribute("class", "trame");
   $SVG.appendChild($G);
   let dx,dy;
@@ -1403,7 +1405,7 @@ const pathPts = (path, step = 0.01) => {
 
   MotionPathPlugin.cacheRawPathMeasurements(rawPath);
 
-  for(let t=0;t<1.01;t+=step){
+  for(let t=0;t<1.0;t+=step){
     let p = MotionPathPlugin.getPositionOnPath(rawPath, t, true);
     let noise = perlin.get(p.x/NN,p.y/NN);
     let nx = Math.cos(deg2rad(p.angle+90))*noise;
@@ -1820,6 +1822,107 @@ export const tracerLArc = (x,y,r=1,angle1=0,angle2=90) => {
 }
 
 /**
+ * tracer l'arc donut 
+ * @param {number} x position x du centre
+ * @param {number} y position y du centre
+ * @param {number} r1 rayon interne
+ * @param {number} r2 rayon externe
+ * @param {number} angle1 angle de départ en degrés
+ * @param {number} angle2 angle de fin en degrés
+ * @returns {element} chemin SVG
+ * @example tracerLArcDonu(1,1,1,2,0,90) 
+ * draw the arc
+ * @param.en {number} x center x position
+ * @param.en {number} y center y position
+ * @param.en {number} r1 radius
+ * @param.en {number} r2 radius
+ * @param.en {number} angle1 start angle in degrees
+ * @param.en {number} angle2 end angle in degrees
+ * @returns.en {element} SVG path
+ * @example.en drawArcDonut(1,1,1,2,0,90)
+*/
+
+export const tracerLArcDonut = (cx, cy, r1 = 1, r2 = 2, angle1 = 0, angle2 = 90) => {
+  // convert coord points
+  cx = isNaN(cx) ? (cx.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 : cx*50;
+  cy = isNaN(cy) ? (cy.toUpperCase().charCodeAt(0)-65)%NAZ * 50 + 50 : cy*50;
+  r1 = r1*50;
+  r2 = r2*50;
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+  let normalizedA1 = angle1 % 360;
+  let normalizedA2 = angle2 % 360;
+
+  // Vérifier si l'arc fait un cercle complet
+  const isFullCircle = Math.abs(normalizedA2 - normalizedA1) === 0 || 
+                      Math.abs(normalizedA2 - normalizedA1) === 360;
+
+  if (isFullCircle) {
+      // Pour un cercle complet, on utilise deux arcs de 180 degrés
+      const midAngle = (normalizedA1 + 180) * Math.PI / 180;
+      
+      const x1 = cx + r1 * Math.cos(normalizedA1 * Math.PI / 180);
+      const y1 = cy + r1 * Math.sin(normalizedA1 * Math.PI / 180);
+      const x2 = cx + r2 * Math.cos(normalizedA1 * Math.PI / 180);
+      const y2 = cy + r2 * Math.sin(normalizedA1 * Math.PI / 180);
+      
+      const xMid1 = cx + r1 * Math.cos(midAngle);
+      const yMid1 = cy + r1 * Math.sin(midAngle);
+      const xMid2 = cx + r2 * Math.cos(midAngle);
+      const yMid2 = cy + r2 * Math.sin(midAngle);
+
+      let d = `
+          M${x2},${y2}
+          A${r2},${r2} 0 1 1 ${xMid2},${yMid2}
+          A${r2},${r2} 0 1 1 ${x2},${y2}
+          M${x1},${y1}
+          A${r1},${r1} 0 1 0 ${xMid1},${yMid1}
+          A${r1},${r1} 0 1 0 ${x1},${y1}
+          Z
+      `.replace(/\s+/g, ' ').trim();
+      
+      path.setAttribute("d", d);
+  } else {
+      // Code existant pour les arcs partiels
+      if (normalizedA1 > normalizedA2) {
+          normalizedA2 += 360;
+      }
+
+      const startAngle = normalizedA1 * Math.PI / 180;
+      const endAngle = normalizedA2 * Math.PI / 180;
+
+      const x1 = cx + r1 * Math.cos(startAngle);
+      const y1 = cy + r1 * Math.sin(startAngle);
+      const x2 = cx + r2 * Math.cos(startAngle);
+      const y2 = cy + r2 * Math.sin(startAngle);
+      const x3 = cx + r1 * Math.cos(endAngle);
+      const y3 = cy + r1 * Math.sin(endAngle);
+      const x4 = cx + r2 * Math.cos(endAngle);
+      const y4 = cy + r2 * Math.sin(endAngle);
+
+      const largeArcFlag = Math.abs(normalizedA2 - normalizedA1) > 180 ? 1 : 0;
+
+      let d = `
+          M${x1},${y1}
+          L${x2},${y2}
+          A${r2},${r2} 0 ${largeArcFlag} 1 ${x4},${y4}
+          L${x3},${y3}
+          A${r1},${r1} 0 ${largeArcFlag} 0 ${x1},${y1}
+          Z
+      `.replace(/\s+/g, ' ').trim();
+      
+      path.setAttribute("d", d);
+  }
+
+  path.setAttribute("stroke-width", currentWidth);
+  path.setAttribute("stroke", currentStroke);
+  path.setAttribute("fill", "none");
+  $SVG.appendChild(path);
+  return path;
+};
+
+
+/**
  * placer sur une grille
  * @param {element} brush  éléments à cloner
  * @param {number} nx nombre de colonnes
@@ -1969,7 +2072,8 @@ export const tracerLeParagraphe = (text,x=1,y=1,scale = 0.8) => {
 
 /**
  * tracer le texte sur une ligne
- * @param {string} text texte à tracer * @param {number} x position x 
+ * @param {string} text texte à tracer 
+ * @param {number} x position x 
  * @param {number} y position y 
  * @param {number} scale échelle 
  * @returns {element} groupe SVG
@@ -2162,11 +2266,11 @@ export const fusionner = (element1,element2) => {
  * @param.en {number} angle rotation angle in degrees
  * @example.en rotate(element,90) 
  */
-export const tourner = (element,angle) => {
+export const tourner = (element,angle,duration=0) => {
   if(element.dataset.center){
-    gsap.to(element, {rotate:angle, duration: 0.5});
+    gsap.to(element, {rotate:angle, duration: duration});
   }else{
-    gsap.to(element, {rotate:angle, duration: 0.5, transformOrigin:"50% 50%"});
+    gsap.to(element, {rotate:angle, duration: duration, transformOrigin:"50% 50%"});
   }
 }
 
@@ -2300,3 +2404,16 @@ export const langue = (text) => {
 
 
 
+/**
+ * signer le dessin
+ * @param {string} signature
+ * @example signer("Lucie - 01")
+ * sign the drawing
+ * @param.en {string} signature
+ * @example.en signer("Lucie - 01")
+ */
+
+export const signer = (text) => {
+  const H = (($SVG.viewBox.baseVal.height+$SVG.viewBox.baseVal.y)/50);
+  tracerLeTexte(text,1,H-1.55,1.2);
+}

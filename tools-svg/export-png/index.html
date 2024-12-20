@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Éditeur SVG et Exportateur PNG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #export-all-btn {
+            background-color: #1405AA;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 20px;
+            margin: 10px;
+        }
+        #export-all-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+     
+        }
+        #drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        #svg-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .svg-wrapper {
+            position: relative;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: white;
+            max-width: 300px;
+            text-align: center;
+        }
+        .svg-wrapper svg {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+        .export-btn {
+            background-color: #1405AA;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exportateur PNG</h1>
+    <p>+ Passe les lignes en bleu avec épaisseur fixe.</p>
+    <div id="controls">
+        <div id="drop-zone">
+            Glissez et déposez vos fichiers SVG ici
+        </div>
+        <button id="export-all-btn" disabled>Tout exporter en PNG</button>
+    </div>
+
+    <div id="svg-container"></div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const svgContainer = document.getElementById('svg-container');
+        const exportAllBtn = document.getElementById('export-all-btn');
+
+        // Gestion du drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#e0e0e0';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = 'transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.type === 'image/svg+xml') {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const svgContent = e.target.result;
+                        addSVGToContainer(svgContent, file.name);
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        }
+
+        function addSVGToContainer(svgContent, filename) {
+            // Créer un wrapper pour le SVG
+            const wrapper = document.createElement('div');
+            wrapper.className = 'svg-wrapper';
+
+            // Ajouter un bouton de suppression
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '×';
+            removeBtn.className = 'remove-btn';
+            removeBtn.addEventListener('click', () => {
+                svgContainer.removeChild(wrapper);
+                
+                // Mettre à jour le bouton d'export global
+                updateExportAllButton();
+            });
+            wrapper.appendChild(removeBtn);
+
+            // Conteneur pour l'image SVG
+            const svgPreview = document.createElement('div');
+            svgPreview.innerHTML = svgContent;
+            
+            // Modifier les contours du SVG
+            const svgElement = svgPreview.querySelector('svg');
+            if (svgElement) {
+                svgElement.querySelectorAll('*').forEach(el => {
+                    if (el.tagName !== 'svg') {
+                        el.style.stroke = '#1405AA';
+                        // remove stroke-width from style attribute
+                        // el.style.removeProperty('stroke-width');
+                        //     vector-effect="non-scaling-stroke"
+                        el.setAttribute('vector-effect', 'non-scaling-stroke');
+                        el.removeAttribute('stroke-width');
+                        el.setAttribute('stroke-width', '1');
+                        // get scale factor form transform matrix
+                   
+                       
+                    }
+                });
+                
+                // Stocker le SVG element et le filename dans le wrapper
+                wrapper.svgElement = svgElement;
+                wrapper.filename = filename;
+            }
+
+            // Bouton d'export
+            const exportBtn = document.createElement('button');
+            exportBtn.textContent = 'Exporter en PNG';
+            exportBtn.className = 'export-btn';
+            exportBtn.addEventListener('click', () => {
+                exportToPNG(svgElement, filename);
+            });
+
+            // Ajouter au wrapper
+            wrapper.appendChild(svgPreview.firstChild);
+            wrapper.appendChild(exportBtn);
+
+            // Ajouter au conteneur
+            svgContainer.appendChild(wrapper);
+            
+            // Activer le bouton d'export global
+            updateExportAllButton();
+        }
+
+        function updateExportAllButton() {
+            const svgWrappers = svgContainer.querySelectorAll('.svg-wrapper');
+            exportAllBtn.disabled = svgWrappers.length === 0;
+        }
+
+        function exportToPNG(svgElement, filename) {
+            // Créer un clone du SVG pour ne pas modifier l'original
+            const clonedSvg = svgElement.cloneNode(true);
+            clonedSvg.innerHTML = "";  
+            // add a group to the svg
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            clonedSvg.appendChild(group);
+            group.innerHTML = svgElement.innerHTML;
+            console.log(svgElement.innerHTML);
+
+            // Extraire les informations du viewBox
+            const viewBox = clonedSvg.getAttribute('viewBox');
+            const [vbX, vbY, vbWidth, vbHeight] = viewBox ? viewBox.split(' ').map(Number) : [0, 0, 100, 100];
+
+            // translate the group to -vbX, -vbY
+            // group.setAttribute('transform', `translate(${-vbX} ${-vbY})`);
+
+            // Créer un canvas avec les dimensions du viewBox
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Définir la résolution du canvas
+            const scale = 1;
+            canvas.width = vbWidth * scale;
+            canvas.height = vbHeight * scale;
+
+            // Préparer l'image SVG
+            const img = new Image();
+          
+            // clonedSvg.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+            clonedSvg.setAttribute('width', canvas.width);
+            clonedSvg.setAttribute('height', canvas.height);
+            // add white background
+            clonedSvg.setAttribute('style', 'background-color: white');
+
+            // Sérialiser le SVG
+            const svgData = new XMLSerializer().serializeToString(clonedSvg);
+            const svg64 = btoa(unescape(encodeURIComponent(svgData)));
+            img.src = `data:image/svg+xml;base64,${svg64}`;
+
+            img.onload = () => {
+                // Dessiner l'image sur le canvas
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Convertir en PNG et télécharger
+                const pngData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = filename.replace('.svg', '.png');
+                link.href = pngData;
+                link.click();
+            };
+
+            img.onerror = (error) => {
+                console.error('Erreur lors du chargement du SVG:', error);
+                alert('Impossible de convertir le SVG en PNG. Vérifiez le format du fichier.');
+            };
+        }
+
+        // Ajouter un gestionnaire pour le bouton "Tout exporter"
+        exportAllBtn.addEventListener('click', () => {
+            const svgWrappers = svgContainer.querySelectorAll('.svg-wrapper');
+            svgWrappers.forEach(wrapper => {
+                if (wrapper.svgElement) {
+                    exportToPNG(wrapper.svgElement, wrapper.filename);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
