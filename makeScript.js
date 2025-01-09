@@ -1,7 +1,7 @@
 export const makeScript = (script,functionNames,code,DURATION,STAGGER) => {
   let fr = Object.keys(functionNames).join(', ');
   let eng = Object.entries(functionNames).map(([key, value]) => `${key} as ${value}`).join(', ');
-  script.textContent = `import {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z} from './main.js';`;
+  script.textContent = `import {$SVG,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z} from './main.js';`;
   script.textContent += `import{ ${fr}, ${eng} } from './main.js';`
   script.textContent += `${code}`;
   script.textContent += ` ; `;

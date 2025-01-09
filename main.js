@@ -65,6 +65,7 @@ export const functionNames= {
   'tracerLeContour': 'drawOutline',
   'appliquerLesTransformations': 'applyTransformations',
   'png':'_png',
+  'mp4':'_mp4',
   'langue':'language',
 };
 
@@ -2416,4 +2417,85 @@ export const langue = (text) => {
 export const signer = (text) => {
   const H = (($SVG.viewBox.baseVal.height+$SVG.viewBox.baseVal.y)/50);
   tracerLeTexte(text,1,H-1.55,1.2);
+}
+
+/**
+ * export en mp4
+ * @param {function} drawFunction 
+ * @param {number} frames nombre d'images 
+ * @param {object} options 
+ * @example mp4(draw,2,{W:1080,H:1080,FPS:25})
+ * export as mp4
+ * @param.en {function} drawFunction
+ * @param.en {number} frames
+ * @param.en {object} options
+ */
+
+export const mp4 = (drawFunction,frames=2,options) => {
+
+  const loadImage =   async () => {
+    const svg = $SVG;
+    const image = new Image();
+    let clonedSvgElement = svg.cloneNode(true);
+    let outerHTML = clonedSvgElement.outerHTML,  blob = new Blob([outerHTML],{type:'image/svg+xml;charset=utf-8'});
+    let URL = window.URL || window.webkitURL || window;
+    let blobURL = URL.createObjectURL(blob);
+    image.src = blobURL;
+    await image.decode();
+    return image;
+  }
+  
+  const download = (url, filename) => {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename || "download";
+    anchor.click();
+  };
+
+
+  const W = options.W || 1080;
+  const H = options.H || 1080;
+  const FPS = options.fps || 25;
+  
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  $SVG.setAttribute('width',W);
+  $SVG.setAttribute('height',H);
+
+  HME.createH264MP4Encoder().then(async encoder => {
+    encoder.width  = W;
+    encoder.height = H;
+    encoder.frameRate = FPS;
+    encoder.kbps = 19200*2;
+    encoder.quantizationParameter = 10; // 
+    encoder.initialize();
+
+  
+
+    for (let i = 0; i < frames; ++i) {
+      
+      // draw(i);
+      drawFunction(i);
+
+
+      const svgImage = await loadImage();
+      // clear the ctx with white color
+      ctx.fillStyle = options.color || "white";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.drawImage(svgImage, 0, 0);
+      encoder.addFrameRgba(ctx.getImageData(0, 0, W , H).data);
+      await new Promise(resolve => window.requestAnimationFrame(resolve));
+      // draws.push($SVG.innerHTML);
+      // $SVG.innerHTML = '';
+    }
+
+    encoder.finalize();
+    const uint8Array = encoder.FS.readFile(encoder.outputFilename);
+    download(URL.createObjectURL(new Blob([uint8Array], { type: "video/mp4" })))
+    encoder.delete();
+  })
 }
