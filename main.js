@@ -924,7 +924,7 @@ export const afficherLaGrille = (n=26,numeric = false) => {
      }
   });
 
-
+  return $G;
 
 }
 
