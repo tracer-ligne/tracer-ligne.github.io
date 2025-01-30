@@ -240,7 +240,6 @@
       const editor = monaco.editor.create(document.getElementById('editor'), {
         value:codeStorage,
         language: 'javascript',
-        tabSize: 2,
         // theme: 'vs-dark',
         wordWrap: 'on',
         minimap: { enabled: false },
@@ -248,6 +247,9 @@
         automaticLayout: true,
         
       });
+
+      editor.getModel().updateOptions({ tabSize: 2 });
+      
       // add action cmd + enter
       editor.addAction({
         id: 'run',
