@@ -417,7 +417,7 @@ const createLine = (x1, y1, x2, y2, stroke = currentStroke,strokeWidth = current
  * @example.en color("red")
  */
 
-export const couleur = (stroke = currentStroke, elements) => {
+export const couleur = (stroke = "#1405aa", elements) => {
   if(elements === undefined){
     currentStroke = stroke;
     return false; 
