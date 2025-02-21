@@ -21,6 +21,8 @@ export const functionNames= {
   'adoucir': '_soften',
   'aide': 'help',
   'afficherLaGrille': 'showGrid',
+  'effacer': 'clear',
+  'effacerLaGrille': 'clearGrid',
   'animation': 'animate',
   'auHasard': 'random',
   'bruit': 'noise',
@@ -67,6 +69,7 @@ export const functionNames= {
   'png':'_png',
   'mp4':'_mp4',
   'langue':'language',
+  'codeSecret':'secretCode',
 };
 
 
@@ -2499,3 +2502,61 @@ export const mp4 = (drawFunction,frames=2,options) => {
     encoder.delete();
   })
 }
+
+
+/**
+ * code secret
+ * @param {string} le texte à coder 
+ * @param {object} un objet qui regroupe toutes les fonctions de lettres 
+ * @example codeSecret("Hello",lettres)
+ * code secret
+ * @param.en {string} text to code 
+ * @param.en {object} an object that groups all the letter functions 
+ * @example.en secretCode("Hello",lettres)
+ */
+
+
+export const codeSecret = (txt,lettres) => {
+  let posx = 0;
+  let posy = 0;
+
+  for(let _i=0;_i<txt.length;_i++){
+      if (txt[_i] === "\n"){posy++;posx=0; continue;} // Ignore le saut de ligne
+
+    let lettre;
+    if (lettres[txt[_i]]) {
+      lettre = lettres[txt[_i]]();
+    } else {
+      lettre = tracerLeTexte(txt[_i], 0.85, 1.1, 1.5);
+    }
+    deplacer(lettre, posx % (NAZ-1),  posy);
+    if(posx===NAZ-2) posy++; 
+    posx++; // Augmente seulement si ce n'est pas un saut de ligne
+    posx%=(NAZ-1);
+    if(posy===(NAZ-1)) break;
+  };
+};
+
+
+/**
+ * effacer le contenu du SVG
+ * @example effacer()
+ * clear the SVG content
+ * @example.en clear()
+ */
+export const effacer = () => {
+  $SVG.innerHTML = "";
+};
+
+/**
+ * effacer la grille
+ * @example effacerLaGrille()
+ * clear the grid
+ * @example.en clearGrid()
+ */
+export const effacerLaGrille = () => {
+  const grid = $SVG.querySelector("#grid");
+  if (grid) {
+    grid.remove();
+  }
+};
