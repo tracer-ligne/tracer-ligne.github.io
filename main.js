@@ -64,6 +64,7 @@ export const functionNames= {
   'tracerLEllipse': 'drawEllipse',
   'tracerLEquation': 'drawEquation',
   'tracerLEtoile': 'drawStar',
+  'tracerLaRose': 'drawRose',
   'tracerLEquation': 'drawEquation',
   'tracerLeContour': 'drawOutline',
   'appliquerLesTransformations': 'applyTransformations',
@@ -2675,4 +2676,89 @@ export const effacerLaGrille = () => {
   if (grid) {
     grid.remove();
   }
+};
+
+
+
+/**
+ * Génère un attribut path SVG pour une rose polaire
+ * @param {number} cx - Coordonnée x du centre
+ * @param {number} cy - Coordonnée y du centre
+ * @param {number} r - Rayon maximal
+ * @param {number} n - Numérateur de la fraction n/d
+ * @param {number} d - Dénominateur de la fraction n/d
+ * @param {number} [precision=500] - Nombre de points utilisés pour dessiner la courbe
+ * @example tracerlaRose(100, 100, 50, 3, 7)
+ * @returns {string} - L'attribut path SVG
+ * Generate an SVG path attribute for a polar rose
+ * @param.en {number} cx - x coordinate of the center
+ * @param.en {number} cy - y coordinate of the center
+ * @param.en {number} r - maximum radius
+ * @param.en {number} n - numerator of the fraction n/d
+ * @param.en {number} d - denominator of the fraction n/d
+ * @param.en {number} [precision=500] - number of points used to draw the curve
+ * @returns.en {string} - The SVG path attribute
+ * @example.en drawRose(100, 100, 50, 3, 7)
+ */
+
+
+export const tracerLaRose = (cx, cy, r, n, d, precision = 500, tourMultiplier = 1) => {
+  const NAZ = 26; // Ajustez cette valeur selon votre besoin
+
+  // Conversion des coordonnées si nécessaire
+  cx = isNaN(cx) ? (cx.toUpperCase().charCodeAt(0) - 65) % NAZ * 50 + 50 : cx * 50;
+  cy = isNaN(cy) ? (cy.toUpperCase().charCodeAt(0) - 65) % NAZ * 50 + 50 : cy * 50;
+  r = r * 50;
+  
+  // Simplification de la fraction n/d
+  const simplified = simplifyFraction(n, d);
+  n = simplified.numerator;
+  d = simplified.denominator;
+  
+  // Calcul de l'angle maximal en fonction de la fermeture de la courbe
+  let angleMultiplier;
+  if (d % 2 === 0 || n % 2 === 1) {
+    angleMultiplier = 2 * d;
+  } else {
+    angleMultiplier = d;
+  }
+  
+  // Appliquer le multiplicateur de tours
+  const maxAngle = angleMultiplier * Math.PI * tourMultiplier;
+  
+  let pathD = '';
+  let firstPoint = null;
+
+  for (let i = 0; i <= precision; i++) {
+    const theta = (i / precision) * maxAngle;
+    const radius = r * Math.cos((n / d) * theta);
+    const x = cx + radius * Math.cos(theta);
+    const y = cy + radius * Math.sin(theta);
+    
+    if (i === 0) {
+      pathD += `M ${x} ${y}`;
+      firstPoint = { x, y };
+    } else {
+      pathD += ` L ${x} ${y}`;
+    }
+  }
+
+
+  
+  let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", pathD);
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", currentStroke); 
+  path.setAttribute("stroke-width", currentWidth); 
+  
+  $SVG.appendChild(path);
+  
+  return path;
+};
+
+// Fonction pour simplifier une fraction
+const simplifyFraction = (numerator, denominator) => {
+  const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+  const divisor = gcd(numerator, denominator);
+  return { numerator: numerator / divisor, denominator: denominator / divisor };
 };
