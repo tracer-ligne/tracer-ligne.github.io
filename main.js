@@ -2710,24 +2710,12 @@ export const tracerLaRose = (cx, cy, r, n, d, precision = 500, tourMultiplier = 
   cy = isNaN(cy) ? (cy.toUpperCase().charCodeAt(0) - 65) % NAZ * 50 + 50 : cy * 50;
   r = r * 50;
   
-  // Simplification de la fraction n/d
-  const simplified = simplifyFraction(n, d);
-  n = simplified.numerator;
-  d = simplified.denominator;
-  
-  // Calcul de l'angle maximal en fonction de la fermeture de la courbe
-  let angleMultiplier;
-  if (d % 2 === 0 || n % 2 === 1) {
-    angleMultiplier = 2 * d;
-  } else {
-    angleMultiplier = d;
-  }
+  const nbTours = calculerTours(n, d);
   
   // Appliquer le multiplicateur de tours
-  const maxAngle = angleMultiplier * Math.PI * tourMultiplier;
+  const maxAngle = 2 * Math.PI * nbTours * tourMultiplier;
   
   let pathD = '';
-  let firstPoint = null;
 
   for (let i = 0; i <= precision; i++) {
     const theta = (i / precision) * maxAngle;
@@ -2737,7 +2725,6 @@ export const tracerLaRose = (cx, cy, r, n, d, precision = 500, tourMultiplier = 
     
     if (i === 0) {
       pathD += `M ${x} ${y}`;
-      firstPoint = { x, y };
     } else {
       pathD += ` L ${x} ${y}`;
     }
@@ -2756,9 +2743,37 @@ export const tracerLaRose = (cx, cy, r, n, d, precision = 500, tourMultiplier = 
   return path;
 };
 
-// Fonction pour simplifier une fraction
-const simplifyFraction = (numerator, denominator) => {
-  const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
-  const divisor = gcd(numerator, denominator);
-  return { numerator: numerator / divisor, denominator: denominator / divisor };
-};
+
+/**
+ * Calcule le PGCD (Plus Grand Commun Diviseur) de deux nombres
+ * @param {number} a Premier nombre
+ * @param {number} b Second nombre
+ * @return {number} Le PGCD
+ */
+function pgcd(a, b) {
+  if (b === 0) return a;
+  return pgcd(b, a % b);
+}
+
+/**
+* Calcule le nombre de tours nécessaires pour fermer une courbe rose polaire
+* @param {number} n Numérateur du facteur dans cos(n/d·θ)
+* @param {number} d Dénominateur du facteur dans cos(n/d·θ)
+* @return {number} Nombre de tours pour fermer la courbe
+*/
+function calculerTours(n, d) {
+  // Si n/d est simplifié, le nombre de tours est d si n et d sont premiers entre eux
+  // Si n est pair, la courbe fait d tours
+  // Si n est impair, la courbe fait 2d tours
+  
+  // Simplifier n/d
+  const diviseurCommun = pgcd(Math.abs(n), Math.abs(d));
+  const nSimp = Math.abs(n) / diviseurCommun;
+  const dSimp = Math.abs(d) / diviseurCommun;
+  
+  // Pour une rose polaire r = cos(n/d·θ)
+  // Si n est pair, la période est π·lcm(d, 1)/n = π·d/n
+  // Si n est impair, la période est 2π·lcm(d, 1)/n = 2π·d/n
+  
+  return nSimp % 2 === 0 ? dSimp : 2 * dSimp;
+}
