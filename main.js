@@ -2770,10 +2770,13 @@ function calculerTours(n, d) {
   const diviseurCommun = pgcd(Math.abs(n), Math.abs(d));
   const nSimp = Math.abs(n) / diviseurCommun;
   const dSimp = Math.abs(d) / diviseurCommun;
-  
+
   // Pour une rose polaire r = cos(n/d·θ)
   // Si n est pair, la période est π·lcm(d, 1)/n = π·d/n
   // Si n est impair, la période est 2π·lcm(d, 1)/n = 2π·d/n
   
-  return nSimp % 2 === 0 ? dSimp : 2 * dSimp;
+  let res = nSimp % 2 === 0 ? 1*dSimp : 0.5 * dSimp;
+  res = (dSimp % 2 === 0) ? 2 * res : 1 * res;
+  return res;
+
 }
