@@ -72,6 +72,7 @@ export const functionNames= {
   'mp4':'_mp4',
   'langue':'language',
   'codeSecret':'secretCode',
+  'lireImage':'readImage',
 };
 
 
@@ -2780,3 +2781,37 @@ function calculerTours(n, d) {
   return res;
 
 }
+
+
+
+// read the localStorage image
+
+export const lireImage = async (w) => {
+  const img = new Image();
+  img.src = JSON.parse(localStorage.getItem("image")).base;
+
+  await new Promise((resolve) => {
+    img.onload = resolve;
+  });
+
+  const ratio = img.height / img.width;
+  const h = ~~(ratio * w);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = w;
+  canvas.height = h;
+  ctx.drawImage(img, 0, 0 , w, h); 
+
+  const array2D = [];
+  for (let i = 0; i < h; i++) {
+    array2D.push([]);
+    for (let j = 0; j < w; j++) {
+      const pixelData = ctx.getImageData(j, i, 1, 1).data;
+      const greyLevel = Math.round((pixelData[0] + pixelData[1] + pixelData[2]) / 3);
+      array2D[i].push(greyLevel);
+    }
+  }
+
+  console.log(array2D);
+  return array2D;
+};

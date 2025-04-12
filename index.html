@@ -519,17 +519,31 @@
 
       const file = e.dataTransfer.files[0];
       console.warn(file);
-      if (file.type.includes('javascript')) {
-      
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const code = event.target.result;
-        const model = monaco.editor.getModels()[0];
-        console.warn(code);
-        model.setValue(code);
-      };
-      reader.readAsText(file);
+      if (file.type.includes('javascript')) {      
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const code = event.target.result;
+          const model = monaco.editor.getModels()[0];
+          console.warn(code);
+          model.setValue(code);
+        };
+        reader.readAsText(file);
       }
+      // includes images type (jpeg, gif, png, webp)
+      if (file.type.includes('image')) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const base64String = reader.result; // .replace('data:', '').replace(/^.+,/, '')
+          // store file
+          localStorage.setItem('image', JSON.stringify({type: file.type, base: base64String}));
+          
+
+          
+        };
+        reader.readAsDataURL(file);
+      }
+
+
     });
 
 
